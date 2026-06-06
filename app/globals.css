@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/*
+  Aurion brand design system — locked. See CLAUDE.md §5.
+  Tailwind v4: tokens live here in @theme as --color-* (and --font-*).
+  Use them in markup as e.g. bg-navy, text-cream, border-line, rounded-aurion.
+*/
+@theme {
+  /* Surfaces & lines */
+  --color-navy: #1b2a47; /* dark header surface */
+  --color-navy-deep: #131e33;
+  --color-cream: #f6f1e7; /* page background */
+  --color-paper: #ffffff; /* card / text input */
+  --color-paper-tint: #faf6ee; /* number input fill */
+  --color-line: #e7decc; /* default border */
+  --color-line-strong: #d9cdb6; /* heavier border / disabled button */
+
+  /* Ink */
+  --color-ink: #211f1a; /* primary text */
+  --color-ink-soft: #57514a;
+  --color-muted: #9a9282; /* placeholders */
+  --color-disabled-ink: #8a8270; /* disabled button text */
+
+  /* Aurion gold family */
+  --color-gold: #c6a253; /* brand gold (wordmark + star) */
+  --color-gold-deep: #a4924e; /* deep gold (rays) — borders, active step, hover */
+  --color-gold-soft: #bba46a; /* lighter gold — secondary labels */
+  --color-gold-tint: #fbf6ea; /* selected segmented option fill */
+
+  /* Shape */
+  --radius-aurion: 14px;
+
+  /* Fonts — always loaded (see app/layout.tsx). Never a system fallback for Arabic. */
+  --font-display: var(--font-cinzel), serif; /* brand wordmark / headings */
+  --font-sans: var(--font-jakarta), system-ui, sans-serif; /* UI Latin */
+  --font-ar: var(--font-plex-arabic), sans-serif; /* Arabic */
+}
+
+html {
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Arabic mode: applied on the tree when lang === 'ar'. */
+.font-ar,
+.font-ar :where(input, textarea, button, select) {
+  font-family: var(--font-ar);
+}
+
+/* iOS: inputs must render ≥16px to avoid auto-zoom on focus (CLAUDE.md §2). */
+input,
+textarea,
+select {
+  font-size: max(16px, 1rem);
+}
