@@ -6,11 +6,14 @@ import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import { useHandoverRealtime, type RealtimeStatus } from "@/lib/useHandoverRealtime";
+import { useIdleLock } from "@/lib/useIdleLock";
 import { PROPERTIES, type PropertySlug } from "@/lib/properties";
-import { formatSAR, todayIso } from "@/lib/handover";
+import { todayIso } from "@/lib/handover";
 import {
+  dashboardTotals,
   isoDaysBefore,
   missingShifts,
+  propertySnapshots,
   varianceFlags,
   weekStats,
   type ManagerRow,
@@ -26,18 +29,17 @@ import {
 
 const PAGE = 25;
 
-// Date/number display in the manager's own language (en/ar/sv). SV uses Western digits.
-function mDigits(value: string | number, lang: ManagerLang): string {
+function dg(value: string | number, lang: ManagerLang): string {
   const s = String(value);
   return lang === "ar" ? toArabicIndicDigits(s) : s;
 }
-function mSAR(value: number | string | null | undefined, lang: ManagerLang): string {
-  // Reuse the app SAR formatter for en/ar; for sv fall back to en-style with "SAR".
-  if (lang === "ar") return formatSAR(value, "ar");
-  if (value === null || value === undefined || value === "") return "—";
-  const n = typeof value === "string" ? Number(value) : value;
-  if (Number.isNaN(n)) return "—";
-  return `SAR ${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+function sar(value: number | null | undefined, lang: ManagerLang): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return "—";
+  const grouped = value.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  return lang === "ar" ? `${toArabicIndicDigits(grouped)} ر.س` : `SAR ${grouped}`;
 }
 
 const SHIFT_KEY: Record<string, ManagerKey> = {
@@ -45,10 +47,10 @@ const SHIFT_KEY: Record<string, ManagerKey> = {
   morning: "shiftMorning",
   afternoon: "shiftAfternoon",
 };
-
+const propKey = (slug: string): ManagerKey =>
+  slug === "al_aqeeq" ? "propAlAqeeq" : "propAsSalaam";
 function propName(r: ManagerRow, lang: ManagerLang): string {
   if (!r.properties) return "—";
-  // Arabic uses the AR name; en/sv use the English name.
   return lang === "ar" ? r.properties.name_ar : r.properties.name_en;
 }
 
@@ -56,9 +58,6 @@ export function ManagerDashboard() {
   const router = useRouter();
   const { lang: globalLang } = useLang();
 
-  // Manager language (en/ar/sv). Defaults to the app's language (so an Arabic app
-  // opens the manager in Arabic) and can be overridden locally — including SV,
-  // which is exclusive to this page.
   const [lang, setLang] = useState<ManagerLang>(globalLang);
   const t = (k: ManagerKey) => mt(k, lang);
   const dir = managerDir(lang);
@@ -69,13 +68,16 @@ export function ManagerDashboard() {
   const [rows, setRows] = useState<ManagerRow[]>([]);
   const [visible, setVisible] = useState(PAGE);
 
+  // Auto-lock after 5 min idle.
+  useIdleLock(() => {
+    fetch("/api/manager-auth", { method: "DELETE" }).finally(() => router.refresh());
+  });
+
   const argsRef = useRef({ scope, selectedDate, property });
   useEffect(() => {
     argsRef.current = { scope, selectedDate, property };
   }, [scope, selectedDate, property]);
 
-  // Fetch handovers. Week scope = 7-day window ending on the selected date.
-  // All scope = every handover (manager sees ALL data).
   const load = useCallback(
     async (s: "week" | "all", date: string, prop: PropertySlug | null) => {
       await Promise.resolve();
@@ -104,8 +106,7 @@ export function ManagerDashboard() {
   );
 
   useEffect(() => {
-    // load() awaits a microtask before any setState, so this is not a synchronous
-    // setState in an effect; the rule can't see through the async hop.
+    // load() awaits a microtask before any setState (not a sync setState-in-effect).
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load(scope, selectedDate, property);
   }, [scope, selectedDate, property, load]);
@@ -133,17 +134,40 @@ export function ManagerDashboard() {
     router.refresh();
   }
 
+  // Snapshots use ALL handovers (latest state per property), regardless of the
+  // week/all toggle, so "cash in drawer" + occupancy always reflect reality.
+  const [snapshotRows, setSnapshotRows] = useState<ManagerRow[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    createClient()
+      .from("handovers")
+      .select("*, properties(name_en, name_ar, code)")
+      .eq("status", "completed")
+      .order("created_at", { ascending: false })
+      .limit(200)
+      .then(({ data }) => {
+        if (!cancelled) setSnapshotRows((data ?? []) as ManagerRow[]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [rows]);
+
+  const snaps = propertySnapshots(snapshotRows);
+  const totals = dashboardTotals(snaps);
+
   const dayRows = rows.filter((r) => r.shift_date === selectedDate);
   const missing = missingShifts(dayRows);
   const flags = varianceFlags(rows);
   const stats = weekStats(rows);
+  const scopeLabel = scope === "week" ? t("scopeWeek") : t("scopeAll");
 
   return (
     <main
       dir={dir}
-      className={`mx-auto flex w-full max-w-[640px] flex-col gap-4 px-4 py-5 ${lang === "ar" ? "font-ar" : ""}`}
+      className={`mx-auto flex w-full max-w-[680px] flex-col gap-4 px-4 py-5 ${lang === "ar" ? "font-ar" : ""}`}
     >
-      {/* Top bar: live + language + lock */}
+      {/* Top bar */}
       <div className="flex items-center justify-between gap-3">
         <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-ink-soft">
           <span
@@ -152,23 +176,84 @@ export function ManagerDashboard() {
           />
           {status === "live" ? t("live") : t("reconnecting")}
         </span>
-
         <div className="flex items-center gap-2">
           <LangPicker lang={lang} onChange={setLang} />
           <button
             type="button"
             onClick={handleLock}
-            className="rounded-full glass px-3 py-1.5 text-[13px] font-bold text-ink-soft"
+            className="glass rounded-full px-3.5 py-2 text-[13px] font-bold text-ink-soft"
           >
             {t("lock")}
           </button>
         </div>
       </div>
 
+      {/* HERO — portfolio KPIs */}
+      <section className="glass-navy overflow-hidden rounded-[20px] p-5 text-cream">
+        <p className="text-[12px] font-medium uppercase tracking-wide text-gold-soft">
+          {t("overview")} · {t("acrossProperties")}
+        </p>
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          <Hero label={t("cashInDrawer")} value={sar(totals.cashInDrawer, lang)} />
+          <Hero
+            label={t("occupancy")}
+            value={`${dg(totals.occupancyPct, lang)}%`}
+            sub={`${dg(totals.roomsOccupied, lang)} / ${dg(totals.totalRooms, lang)} ${t("rooms")}`}
+          />
+        </div>
+        {/* portfolio occupancy bar */}
+        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-cream/20">
+          <div
+            className="h-full rounded-full bg-gold transition-all duration-500"
+            style={{ width: `${totals.occupancyPct}%` }}
+          />
+        </div>
+      </section>
+
+      {/* By-property snapshot cards */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {snaps.map((s) => (
+          <div key={s.slug} className="glass rounded-aurion p-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[15px] font-bold text-ink">{mt(propKey(s.slug), lang)}</h3>
+              <span className="text-[13px] font-bold text-gold-deep">
+                {s.occupancyPct === null ? "—" : `${dg(s.occupancyPct, lang)}%`}
+              </span>
+            </div>
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-line">
+              <div
+                className="h-full rounded-full bg-gold-deep transition-all duration-500"
+                style={{ width: `${s.occupancyPct ?? 0}%` }}
+              />
+            </div>
+            <dl className="mt-3 flex items-end justify-between">
+              <div>
+                <dt className="text-[11px] text-ink-soft">{t("cashInDrawer")}</dt>
+                <dd className="text-[15px] font-bold text-ink">{sar(s.cashInDrawer, lang)}</dd>
+              </div>
+              <div className="text-end">
+                <dt className="text-[11px] text-ink-soft">{t("roomsOccupied")}</dt>
+                <dd className="text-[15px] font-bold text-ink">
+                  {s.roomsOccupied === null
+                    ? "—"
+                    : `${dg(s.roomsOccupied, lang)} / ${dg(s.totalRooms, lang)}`}
+                </dd>
+              </div>
+            </dl>
+            {s.latest ? (
+              <p className="mt-2 text-[11px] text-muted">
+                {t("lastUpdated")}: {dg(s.latest.shift_date, lang)}
+              </p>
+            ) : (
+              <p className="mt-2 text-[11px] text-muted">{t("noData")}</p>
+            )}
+          </div>
+        ))}
+      </div>
+
       {/* Scope + filters */}
       <section className="glass flex flex-col gap-4 rounded-aurion p-4">
         <ScopeToggle scope={scope} onChange={setScope} t={t} />
-
         {scope === "week" ? (
           <label className="flex flex-col gap-1.5">
             <span className="text-[13px] font-bold text-ink">{t("date")}</span>
@@ -181,7 +266,6 @@ export function ManagerDashboard() {
             />
           </label>
         ) : null}
-
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] font-bold text-ink">{t("property")}</span>
           <div className="grid grid-cols-2 gap-2">
@@ -199,7 +283,7 @@ export function ManagerDashboard() {
                       : "border border-line bg-paper font-medium text-ink-soft",
                   ].join(" ")}
                 >
-                  {mt(p.slug === "al_aqeeq" ? "propAlAqeeq" : "propAsSalaam", lang)}
+                  {mt(propKey(p.slug), lang)}
                 </button>
               );
             })}
@@ -207,18 +291,18 @@ export function ManagerDashboard() {
         </div>
       </section>
 
-      {/* Stats */}
-      <Card title={`${t("stats")} · ${scope === "week" ? t("scopeWeek") : t("scopeAll")}`}>
+      {/* Period stats */}
+      <Card title={`${t("stats")} · ${scopeLabel}`}>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat label={t("statHandovers")} value={mDigits(stats.count, lang)} />
-          <Stat label={t("statMismatches")} value={mDigits(stats.mismatches, lang)} flag={stats.mismatches > 0} />
-          <Stat label={t("statTotalVariance")} value={mSAR(stats.totalVariance, lang)} flag={Math.abs(stats.totalVariance) > 0.005} />
-          <Stat label={t("statAvgVariance")} value={mSAR(stats.avgVariance, lang)} />
+          <Stat label={t("statHandovers")} value={dg(stats.count, lang)} />
+          <Stat label={t("statMismatches")} value={dg(stats.mismatches, lang)} flag={stats.mismatches > 0} />
+          <Stat label={t("statTotalVariance")} value={sar(stats.totalVariance, lang)} flag={Math.abs(stats.totalVariance) > 0.005} />
+          <Stat label={t("statAvgVariance")} value={sar(stats.avgVariance, lang)} />
         </div>
       </Card>
 
-      {/* Missing shifts (always relative to the selected day) */}
-      <Card title={`${t("missingShifts")} · ${mDigits(selectedDate, lang)}`}>
+      {/* Missing shifts */}
+      <Card title={`${t("missingShifts")} · ${dg(selectedDate, lang)}`}>
         {missing.length === 0 ? (
           <p className="text-[14px] text-ink-soft">{t("missingNone")}</p>
         ) : (
@@ -228,7 +312,7 @@ export function ManagerDashboard() {
                 key={`${m.propertySlug}-${m.shift}`}
                 className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-[13px] font-medium text-amber-900"
               >
-                {mt(m.propertySlug === "al_aqeeq" ? "propAlAqeeq" : "propAsSalaam", lang)} · {t(SHIFT_KEY[m.shift])}
+                {mt(propKey(m.propertySlug), lang)} · {t(SHIFT_KEY[m.shift])}
               </li>
             ))}
           </ul>
@@ -251,7 +335,7 @@ export function ManagerDashboard() {
                     {propName(f, lang)} · {t(SHIFT_KEY[f.shift_type] ?? "shiftNight")} · {f.outgoing_name}
                     {f.incoming_name ? ` → ${f.incoming_name}` : ""}
                   </span>
-                  <span className="font-bold text-red-700">{mSAR(f.cash_variance, lang)}</span>
+                  <span className="font-bold text-red-700">{sar(f.cash_variance, lang)}</span>
                 </Link>
               </li>
             ))}
@@ -259,7 +343,7 @@ export function ManagerDashboard() {
         )}
       </Card>
 
-      {/* All / recent handovers — manager sees everything (paginated) */}
+      {/* All / recent handovers */}
       <Card title={scope === "all" ? t("allHandovers") : t("recent")}>
         {rows.length === 0 ? (
           <p className="text-[14px] text-ink-soft">{t("empty")}</p>
@@ -276,7 +360,7 @@ export function ManagerDashboard() {
                       <span className="text-[14px] font-medium text-ink">
                         {propName(r, lang)} · {t(SHIFT_KEY[r.shift_type] ?? "shiftNight")}
                       </span>
-                      <span className="text-[12px] text-ink-soft">{mDigits(r.shift_date, lang)}</span>
+                      <span className="text-[12px] text-ink-soft">{dg(r.shift_date, lang)}</span>
                     </span>
                     <span className="text-[13px] font-bold text-gold-deep">{t("view")}</span>
                   </Link>
@@ -299,13 +383,17 @@ export function ManagerDashboard() {
   );
 }
 
-function LangPicker({
-  lang,
-  onChange,
-}: {
-  lang: ManagerLang;
-  onChange: (l: ManagerLang) => void;
-}) {
+function Hero({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div>
+      <p className="text-[12px] font-medium text-cream/70">{label}</p>
+      <p className="mt-1 text-[24px] font-bold leading-tight text-cream">{value}</p>
+      {sub ? <p className="mt-0.5 text-[12px] text-cream/60">{sub}</p> : null}
+    </div>
+  );
+}
+
+function LangPicker({ lang, onChange }: { lang: ManagerLang; onChange: (l: ManagerLang) => void }) {
   return (
     <div className="flex items-center gap-1 rounded-full glass-navy p-1">
       {MANAGER_LANGS.map((l) => {

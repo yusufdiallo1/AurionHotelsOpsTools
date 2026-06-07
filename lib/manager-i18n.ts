@@ -60,6 +60,24 @@ const M = {
   // Properties (names come from DB; this is the picker fallback label set)
   propAlAqeeq: { en: "Al-Aqeeq", ar: "العقيق", sv: "Al-Aqeeq" },
   propAsSalaam: { en: "As-Salaam", ar: "السلام", sv: "As-Salaam" },
+
+  // Hilton-grade dashboard
+  overview: { en: "Overview", ar: "نظرة عامة", sv: "Översikt" },
+  cashInDrawer: { en: "Cash in drawer", ar: "النقد في الدرج", sv: "Kassa i lådan" },
+  occupancy: { en: "Occupancy", ar: "نسبة الإشغال", sv: "Beläggning" },
+  roomsOccupied: { en: "Rooms occupied", ar: "الغرف المشغولة", sv: "Belagda rum" },
+  acrossProperties: { en: "across all properties", ar: "في كل الفنادق", sv: "över alla hotell" },
+  byProperty: { en: "By property", ar: "حسب الفندق", sv: "Per hotell" },
+  rooms: { en: "rooms", ar: "غرفة", sv: "rum" },
+  lastUpdated: { en: "Last update", ar: "آخر تحديث", sv: "Senast uppdaterad" },
+  noData: { en: "No handovers yet", ar: "لا توجد تسليمات بعد", sv: "Inga överlämningar än" },
+
+  // Auto-lock
+  autoLocked: {
+    en: "Locked for security after inactivity.",
+    ar: "تم القفل تلقائيًا بعد فترة خمول.",
+    sv: "Låst av säkerhetsskäl efter inaktivitet.",
+  },
 } as const satisfies Record<string, Entry>;
 
 export type ManagerKey = keyof typeof M;

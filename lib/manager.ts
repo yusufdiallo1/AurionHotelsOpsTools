@@ -77,3 +77,63 @@ export function isoDaysBefore(iso: string, days: number): string {
   d.setDate(d.getDate() - days);
   return d.toISOString().slice(0, 10);
 }
+
+// ── Hilton-grade dashboard aggregations ──────────────────────────────
+
+export type PropertySnapshot = {
+  slug: PropertySlug;
+  totalRooms: number;
+  /** Latest completed handover for this property (most recent state). */
+  latest: ManagerRow | null;
+  /** Rooms occupied at the latest handover. */
+  roomsOccupied: number | null;
+  occupancyPct: number | null;
+  /** Cash currently in the drawer (latest recount, else drawer). */
+  cashInDrawer: number | null;
+  /** Completed-handover count in the scoped rows. */
+  count: number;
+};
+
+/** Per-property snapshot: latest occupancy + current cash + counts. */
+export function propertySnapshots(rows: ManagerRow[]): PropertySnapshot[] {
+  return PROPERTIES.map((p) => {
+    const forProp = rows
+      .filter((r) => r.properties?.code === p.slug && r.status === "completed")
+      .sort((a, b) =>
+        a.created_at && b.created_at ? b.created_at.localeCompare(a.created_at) : 0,
+      );
+    const latest = forProp[0] ?? null;
+    const rooms = latest?.rooms_occupied ?? null;
+    const occ =
+      rooms !== null && p.totalRooms > 0
+        ? Math.round((Math.min(rooms, p.totalRooms) / p.totalRooms) * 100)
+        : null;
+    const cash = latest ? (latest.cash_recount ?? latest.cash_drawer) : null;
+    return {
+      slug: p.slug,
+      totalRooms: p.totalRooms,
+      latest,
+      roomsOccupied: rooms,
+      occupancyPct: occ,
+      cashInDrawer: cash,
+      count: forProp.length,
+    };
+  });
+}
+
+export type DashboardTotals = {
+  cashInDrawer: number; // sum of latest cash across properties
+  roomsOccupied: number; // sum of latest occupied across properties
+  totalRooms: number; // sum of capacity across properties
+  occupancyPct: number; // portfolio occupancy
+};
+
+/** Portfolio-wide totals derived from the per-property snapshots. */
+export function dashboardTotals(snaps: PropertySnapshot[]): DashboardTotals {
+  const cashInDrawer = snaps.reduce((a, s) => a + (s.cashInDrawer ?? 0), 0);
+  const roomsOccupied = snaps.reduce((a, s) => a + (s.roomsOccupied ?? 0), 0);
+  const totalRooms = snaps.reduce((a, s) => a + s.totalRooms, 0);
+  const occupancyPct =
+    totalRooms > 0 ? Math.round((roomsOccupied / totalRooms) * 100) : 0;
+  return { cashInDrawer, roomsOccupied, totalRooms, occupancyPct };
+}

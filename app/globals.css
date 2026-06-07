@@ -49,7 +49,22 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  letter-spacing: -0.011em; /* iOS/SF-style tightening for a native feel */
   overscroll-behavior-y: none; /* avoid rubber-band revealing blank bg */
+}
+
+/* Native-feel momentum scrolling for any internal scroll areas. */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* iOS-native form controls: drop default chrome on text-like inputs so our
+   styling lands. Date/checkbox/radio keep their native pickers. */
+input:where([type="text"], [type="tel"], [type="email"], [type="password"], :not([type])),
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: var(--radius-aurion);
 }
 
 /* Kill the grey tap flash on mobile; we provide our own active states. */
