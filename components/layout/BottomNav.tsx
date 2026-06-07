@@ -76,7 +76,7 @@ export function AppNav() {
         "md:bottom-auto md:top-3 md:pb-0 md:pt-0", // desktop: top
       ].join(" ")}
     >
-      <div className="glass-navy relative w-full max-w-[480px] rounded-[22px] p-1.5 shadow-[0_8px_30px_rgba(19,30,51,0.35)] md:w-auto">
+      <div className="relative w-full max-w-[480px] rounded-[22px] border border-gold/25 bg-navy p-1.5 shadow-[0_8px_30px_rgba(19,30,51,0.45)] md:w-auto">
         {/* Animated solid glass slider behind the active item */}
         <div
           className="pointer-events-none absolute inset-y-1.5 start-1.5 rounded-[16px] bg-gold shadow-md transition-transform duration-300 ease-out"
