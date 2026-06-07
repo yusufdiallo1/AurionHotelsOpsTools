@@ -240,6 +240,12 @@ export const strings = {
   live: { en: "Live", ar: "مباشر" },
   reconnecting: { en: "Reconnecting…", ar: "إعادة الاتصال…" },
 
+  // Incoming handover notification
+  incomingHandoverTitle: { en: "Incoming handover", ar: "تسليم وارد" },
+  incomingHandoverBody: { en: "A shift is being handed to you.", ar: "هناك وردية تُسلَّم إليك." },
+  openHandover: { en: "Open handover", ar: "فتح التسليم" },
+  dismiss: { en: "Dismiss", ar: "تجاهل" },
+
   // ── Manager: passcode gate ───────────────────────────────────────
   managerTitle: { en: "Manager", ar: "المدير" },
   managerLocked: { en: "Manager access", ar: "دخول المدير" },

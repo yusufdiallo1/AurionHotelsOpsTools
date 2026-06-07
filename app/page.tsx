@@ -1,6 +1,7 @@
 "use client";
 
 import { AppHeader, ToolCard } from "@/components/layout";
+import { useAuth } from "@/lib/auth-context";
 import { HomeSearch } from "./HomeSearch";
 
 function Icon({ d }: { d: string }) {
@@ -19,32 +20,41 @@ function Icon({ d }: { d: string }) {
   );
 }
 
-// Home: logo header + the three entry points for the Shift Handover app.
+// Home: receptionists see New Handover only; admins also get search + History + Manager.
 export default function Home() {
+  const { role } = useAuth();
+  const isAdmin = role === "admin";
+
   return (
     <>
       <AppHeader />
 
       <main className="mx-auto flex w-full max-w-[480px] flex-col gap-3.5 px-5 py-8">
-        <HomeSearch />
+        {isAdmin ? <HomeSearch /> : null}
+
         <ToolCard
           href="/new"
           titleKey="navNewTitle"
           descKey="navNewDesc"
           icon={<Icon d="M12 5v14M5 12h14" />}
         />
-        <ToolCard
-          href="/history"
-          titleKey="navHistoryTitle"
-          descKey="navHistoryDesc"
-          icon={<Icon d="M4 5h16M4 12h16M4 19h10" />}
-        />
-        <ToolCard
-          href="/manager"
-          titleKey="navManagerTitle"
-          descKey="navManagerDesc"
-          icon={<Icon d="M4 19V10M10 19V5M16 19v-7M22 19H2" />}
-        />
+
+        {isAdmin ? (
+          <>
+            <ToolCard
+              href="/history"
+              titleKey="navHistoryTitle"
+              descKey="navHistoryDesc"
+              icon={<Icon d="M4 5h16M4 12h16M4 19h10" />}
+            />
+            <ToolCard
+              href="/manager"
+              titleKey="navManagerTitle"
+              descKey="navManagerDesc"
+              icon={<Icon d="M4 19V10M10 19V5M16 19v-7M22 19H2" />}
+            />
+          </>
+        ) : null}
       </main>
     </>
   );

@@ -225,6 +225,14 @@ export default function NewHandoverPage() {
       );
       if (insErr || !inserted) throw insErr ?? new Error("insert");
 
+      // Notify the incoming receptionist (in-app + Web Push). Best-effort,
+      // never blocks the hand-off.
+      fetch("/api/notify-incoming", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: inserted.id }),
+      }).catch(() => {});
+
       clearDraft();
       dirtyRef.current = false;
       router.push(`/new/${inserted.id}`);

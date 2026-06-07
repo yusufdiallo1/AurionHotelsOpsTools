@@ -76,20 +76,23 @@ export function AdminEmployees({
       if (!json.ok) {
         setMsg({ ok: false, text: t("employeeError") });
       } else {
-        setRows((prev) => [
-          {
-            id: json.id,
-            full_name: name,
-            email: email.trim().toLowerCase(),
-            role,
-            property_id: role === "receptionist" ? propertyId : null,
-            shift_type: role === "receptionist" ? shift : null,
-            phone: phone.trim() || null,
-            active: true,
-            created_at: new Date().toISOString(),
-          },
-          ...prev,
-        ]);
+        // Only receptionists appear in this list; new admins aren't shown here.
+        if (role === "receptionist") {
+          setRows((prev) => [
+            {
+              id: json.id,
+              full_name: name,
+              email: email.trim().toLowerCase(),
+              role,
+              property_id: propertyId,
+              shift_type: shift,
+              phone: phone.trim() || null,
+              active: true,
+              created_at: new Date().toISOString(),
+            },
+            ...prev,
+          ]);
+        }
         setMsg({ ok: true, text: t("employeeCreated") });
         // reset for next entry but keep the credentials visible to copy
         setName("");

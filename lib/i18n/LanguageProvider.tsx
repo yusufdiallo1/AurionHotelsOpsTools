@@ -7,12 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import {
-  dirFor,
-  LANG_COOKIE,
-  LANG_COOKIE_MAX_AGE,
-  type Lang,
-} from "@/lib/i18n/config";
+import { dirFor, LANG_COOKIE, type Lang } from "@/lib/i18n/config";
 import { translate, type StringKey } from "@/lib/strings";
 
 type LanguageContextValue = {
@@ -27,8 +22,9 @@ type LanguageContextValue = {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 function persistAndApply(lang: Lang) {
-  // Cookie so the server root layout can set <html lang dir> on next paint (no flash).
-  document.cookie = `${LANG_COOKIE}=${lang}; path=/; max-age=${LANG_COOKIE_MAX_AGE}; samesite=lax`;
+  // SESSION cookie (no max-age): the chosen language survives refresh/navigation
+  // but resets to the default (Arabic) when the browser/tab is closed.
+  document.cookie = `${LANG_COOKIE}=${lang}; path=/; samesite=lax`;
   // Apply immediately to the live document for this session.
   const root = document.documentElement;
   root.lang = lang;
