@@ -201,10 +201,9 @@ export function HistoryList() {
   );
 
   useEffect(() => {
-    // fetchPage awaits a microtask before any setState, so this is not a
-    // synchronous setState-in-effect; the rule can't see through the async hop.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchPage(0, filters);
+    // Debounce so typing in the name field doesn't fire a query per keystroke.
+    const handle = setTimeout(() => fetchPage(0, filters), 250);
+    return () => clearTimeout(handle);
   }, [filters, fetchPage]);
 
   function loadMore() {
@@ -276,17 +275,38 @@ export function HistoryList() {
 
         <div>
           <FieldLabel k="propertyLabel" />
-          <SegmentedSelect
-            options={PROPERTIES.map((p) => ({ value: p.slug, k: p.k }))}
-            value={filters.property}
-            onChange={(v) =>
-              setFilters((f) => ({
-                ...f,
-                property: f.property === v ? null : (v as PropertySlug),
-              }))
-            }
-            columns={3}
-          />
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => setFilters((f) => ({ ...f, property: null }))}
+              className={[
+                "min-h-[48px] rounded-aurion px-2 text-[14px] transition-colors",
+                filters.property === null
+                  ? "border-2 border-gold bg-gold-tint font-bold text-ink"
+                  : "border border-line bg-paper text-ink-soft",
+              ].join(" ")}
+            >
+              {t("filterAll")}
+            </button>
+            {PROPERTIES.map((p) => {
+              const on = filters.property === p.slug;
+              return (
+                <button
+                  key={p.slug}
+                  type="button"
+                  onClick={() => setFilters((f) => ({ ...f, property: p.slug }))}
+                  className={[
+                    "min-h-[48px] rounded-aurion px-2 text-[14px] transition-colors",
+                    on
+                      ? "border-2 border-gold bg-gold-tint font-bold text-ink"
+                      : "border border-line bg-paper text-ink-soft",
+                  ].join(" ")}
+                >
+                  {t(p.k)}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div>

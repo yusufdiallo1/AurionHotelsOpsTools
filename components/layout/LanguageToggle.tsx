@@ -8,15 +8,17 @@ export function LanguageToggle() {
   const { lang, setLang } = useLang();
 
   const base =
-    "min-h-[36px] min-w-[40px] rounded-[10px] px-3 text-[15px] font-bold transition-colors";
+    "min-h-[36px] min-w-[44px] rounded-[10px] px-3 text-[15px] font-bold transition-colors";
+  // Active = gold pill. Idle = gold-deep text, legible on both the navy header and
+  // the cream login page.
   const active = "bg-gold text-navy-deep";
-  const idle = "text-cream/80 hover:text-cream";
+  const idle = "text-gold-deep hover:text-gold";
 
   return (
     <div
       role="group"
       aria-label="Language"
-      className="flex items-center gap-1 rounded-xl bg-white/10 p-1"
+      className="flex items-center gap-1 rounded-xl bg-navy-deep/15 p-1"
     >
       <button
         type="button"
