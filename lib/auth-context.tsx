@@ -8,6 +8,9 @@ export type AuthValue = {
   role: Role | null;
   fullName: string;
   propertyId: string | null;
+  // Receptionist's assigned hotel (slug) + shift, for auto-filling the wizard.
+  propertyCode: string | null;
+  shiftType: string | null;
 };
 
 const AuthContext = createContext<AuthValue>({
@@ -15,6 +18,8 @@ const AuthContext = createContext<AuthValue>({
   role: null,
   fullName: "",
   propertyId: null,
+  propertyCode: null,
+  shiftType: null,
 });
 
 export function AuthProvider({

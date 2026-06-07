@@ -10,6 +10,8 @@ export type SessionProfile = {
   email: string;
   role: Role;
   profile: Profile;
+  /** The receptionist's assigned hotel slug (properties.code), or null. */
+  propertyCode: string | null;
 };
 
 /** The current authenticated user's profile, or null if not signed in. */
@@ -22,16 +24,20 @@ export async function getSessionProfile(): Promise<SessionProfile | null> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("*")
+    .select("*, properties(code)")
     .eq("id", user.id)
     .maybeSingle();
   if (!profile) return null;
+
+  const propertyCode =
+    (profile as { properties?: { code?: string } | null }).properties?.code ?? null;
 
   return {
     userId: user.id,
     email: user.email ?? profile.email,
     role: (profile.role as Role) ?? "receptionist",
-    profile,
+    profile: profile as Profile,
+    propertyCode,
   };
 }
 

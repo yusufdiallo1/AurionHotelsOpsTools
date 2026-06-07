@@ -15,6 +15,7 @@ import {
 } from "@/components/ui";
 import { FieldLabel } from "@/components/ui/FieldLabel";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth-context";
 import { useOnline } from "@/lib/useOnline";
 import { createClient } from "@/lib/supabase/client";
 import { withRetry } from "@/lib/retry";
@@ -28,6 +29,7 @@ import {
   type ShiftType,
 } from "@/lib/handover";
 import { displayDigits } from "@/lib/digits";
+import type { StringKey } from "@/lib/strings";
 
 const DRAFT_KEY = "aurion-handover-draft-v1";
 
@@ -55,12 +57,40 @@ const EMPTY: Draft = {
   notes: "",
 };
 
+// Read-only field: a labelled value the receptionist can't edit (name/hotel/shift).
+function LockedField({ labelKey, value }: { labelKey: StringKey; value: string }) {
+  return (
+    <div>
+      <FieldLabel k={labelKey} />
+      <div className="flex min-h-[52px] items-center rounded-aurion border border-line bg-paper-tint px-4 font-bold text-ink">
+        {value}
+      </div>
+    </div>
+  );
+}
+
 export default function NewHandoverPage() {
   const { t, lang } = useLang();
   const router = useRouter();
   const online = useOnline();
+  const { role, fullName, propertyCode, shiftType } = useAuth();
 
-  const [d, setD] = useState<Draft>(EMPTY);
+  // A receptionist's identity is known — pre-fill name, hotel, and shift and lock
+  // them (they only enter cash / requests / issues). Admins choose manually.
+  const lockIdentity = role === "receptionist";
+  const seededProperty = (PROPERTIES.find((p) => p.slug === propertyCode)?.slug ??
+    null) as PropertySlug | null;
+
+  const [d, setD] = useState<Draft>(() =>
+    lockIdentity
+      ? {
+          ...EMPTY,
+          name: fullName || "",
+          property: seededProperty,
+          shift: shiftType ?? null,
+        }
+      : EMPTY,
+  );
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));
 
@@ -257,26 +287,52 @@ export default function NewHandoverPage() {
       <main className="mx-auto flex w-full max-w-[480px] flex-col gap-6 px-5 py-6">
         <DateField labelKey="fieldDate" value={d.shiftDate} onChange={(v) => set("shiftDate", v)} />
 
-        <PropertyPicker value={d.property} onChange={(v) => set("property", v)} />
+        {lockIdentity ? (
+          <>
+            {/* Receptionist identity is pre-filled from their profile and locked —
+                they only fill cash / requests / issues. */}
+            <LockedField labelKey="fieldYourName" value={d.name || "—"} />
+            <LockedField
+              labelKey="propertyLabel"
+              value={
+                d.property
+                  ? t(PROPERTIES.find((p) => p.slug === d.property)!.k)
+                  : "—"
+              }
+            />
+            <LockedField
+              labelKey="shiftLabel"
+              value={
+                d.shift
+                  ? t(SHIFT_OPTIONS.find((s) => s.value === d.shift)?.k ?? "shiftLabel")
+                  : "—"
+              }
+            />
+          </>
+        ) : (
+          <>
+            <PropertyPicker value={d.property} onChange={(v) => set("property", v)} />
 
-        <div>
-          <FieldLabel k="shiftLabel" />
-          <SegmentedSelect
-            options={SHIFT_OPTIONS.map((s) => ({ value: s.value, k: s.k }))}
-            value={d.shift}
-            onChange={(v) => set("shift", v)}
-            columns={3}
-          />
-        </div>
+            <div>
+              <FieldLabel k="shiftLabel" />
+              <SegmentedSelect
+                options={SHIFT_OPTIONS.map((s) => ({ value: s.value, k: s.k }))}
+                value={d.shift}
+                onChange={(v) => set("shift", v)}
+                columns={3}
+              />
+            </div>
 
-        <TextField
-          labelKey="fieldYourName"
-          placeholderKey="fieldYourNamePlaceholder"
-          value={d.name}
-          onChange={(v) => set("name", v)}
-          autoComplete="name"
-          maxLength={MAX_NAME}
-        />
+            <TextField
+              labelKey="fieldYourName"
+              placeholderKey="fieldYourNamePlaceholder"
+              value={d.name}
+              onChange={(v) => set("name", v)}
+              autoComplete="name"
+              maxLength={MAX_NAME}
+            />
+          </>
+        )}
 
         <div className="flex flex-col gap-2">
           <NumberField
@@ -376,7 +432,15 @@ export default function NewHandoverPage() {
         confirmKey="draftRestore"
         cancelKey="draftDiscard"
         onConfirm={() => {
-          if (restorable) setD(restorable);
+          if (restorable) {
+            // For a logged-in receptionist, identity always comes from their
+            // profile — never from a restored draft.
+            setD(
+              lockIdentity
+                ? { ...restorable, name: fullName || "", property: seededProperty, shift: shiftType ?? null }
+                : restorable,
+            );
+          }
           setRestorable(null);
         }}
         onCancel={() => {

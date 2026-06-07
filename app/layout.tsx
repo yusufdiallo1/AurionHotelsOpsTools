@@ -58,6 +58,8 @@ export default async function RootLayout({
     role: session?.role ?? null,
     fullName: session?.profile.full_name ?? "",
     propertyId: session?.profile.property_id ?? null,
+    propertyCode: session?.propertyCode ?? null,
+    shiftType: session?.profile.shift_type ?? null,
   };
   const signedIn = !!session;
 
