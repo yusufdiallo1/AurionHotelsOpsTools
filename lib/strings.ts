@@ -36,6 +36,8 @@ export const strings = {
   roleAdmin: { en: "Admin", ar: "مدير" },
   receptionNameLabel: { en: "Reception name", ar: "اسم موظف الاستقبال" },
   shiftTimeLabel: { en: "Shift", ar: "الوردية" },
+  usernameLabel: { en: "Username", ar: "اسم المستخدم" },
+  usernamePlaceholder: { en: "e.g. bassam", ar: "مثال: bassam" },
   workDaysLabel: { en: "Working days", ar: "أيام العمل" },
   dowSun: { en: "Sun", ar: "أحد" },
   dowMon: { en: "Mon", ar: "إثن" },

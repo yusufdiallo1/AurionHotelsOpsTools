@@ -12,18 +12,24 @@ export function LoginForm() {
   const params = useSearchParams();
   const next = params.get("next") || "/";
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(false);
 
   async function handleSignIn() {
-    if (!email || !password || submitting) return;
+    if (!identifier || !password || submitting) return;
     setSubmitting(true);
     setError(false);
+    // Staff log in with a username → mapped to the hidden internal email.
+    // Admins may still enter their full email (contains "@").
+    const raw = identifier.trim();
+    const email = raw.includes("@")
+      ? raw.toLowerCase()
+      : `${raw.toLowerCase().replace(/[^a-z0-9._-]/g, "")}@aurion.local`;
     const supabase = createClient();
     const { error: err } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email,
       password,
     });
     if (err) {
@@ -58,17 +64,20 @@ export function LoginForm() {
 
       <div className="glass flex flex-col gap-4 rounded-aurion p-5">
         <label className="flex flex-col gap-1.5">
-          <span className="text-[13px] font-bold text-ink">{t("emailLabel")}</span>
+          <span className="text-[13px] font-bold text-ink">{t("usernameLabel")}</span>
           <input
-            type="email"
+            type="text"
             dir="ltr"
-            autoComplete="email"
-            value={email}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            autoComplete="username"
+            value={identifier}
             onChange={(e) => {
-              setEmail(e.target.value);
+              setIdentifier(e.target.value);
               setError(false);
             }}
-            placeholder={t("emailPlaceholder")}
+            placeholder={t("usernamePlaceholder")}
             className="min-h-[52px] w-full rounded-aurion border border-line bg-paper px-4 text-ink placeholder:text-muted outline-none focus:border-gold-deep"
           />
         </label>
@@ -99,7 +108,7 @@ export function LoginForm() {
         <button
           type="button"
           onClick={handleSignIn}
-          disabled={!email || !password || submitting}
+          disabled={!identifier || !password || submitting}
           className="min-h-[52px] w-full rounded-aurion bg-navy text-[17px] font-bold text-cream disabled:bg-line-strong disabled:text-[#8A8270]"
         >
           {submitting ? t("signingIn") : t("signIn")}

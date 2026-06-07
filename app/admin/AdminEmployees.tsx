@@ -30,6 +30,11 @@ const DOW: { day: number; k: "dowSun" | "dowMon" | "dowTue" | "dowWed" | "dowThu
   { day: 6, k: "dowSat" },
 ];
 
+// Display the username from a stored email (strips the synthetic @aurion.local).
+function usernameOf(email: string): string {
+  return (email || "").split("@")[0] || email;
+}
+
 function randomPassword(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
   let out = "";
@@ -52,8 +57,12 @@ export function AdminEmployees({
   // Add-employee form state
   const [role, setRole] = useState<"receptionist" | "admin">("receptionist");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  // Admins enter a USERNAME; we map it to a hidden internal email for Auth.
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState(randomPassword());
+  // Synthetic email from the username (lowercase, safe chars only).
+  const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+  const syntheticEmail = cleanUsername ? `${cleanUsername}@aurion.local` : "";
   const [propertyId, setPropertyId] = useState<string>(properties[0]?.id ?? "");
   const [shift, setShift] = useState<string>("morning");
   const [workDays, setWorkDays] = useState<number[]>([0, 1, 2, 3, 4]); // Sun–Thu default
@@ -70,7 +79,7 @@ export function AdminEmployees({
   };
 
   async function create() {
-    if (busy || !email.trim() || password.length < 8 || !name.trim()) return;
+    if (busy || !cleanUsername || password.length < 8 || !name.trim()) return;
     setBusy(true);
     setMsg(null);
     try {
@@ -78,7 +87,7 @@ export function AdminEmployees({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
+          email: syntheticEmail,
           password,
           full_name: name,
           role,
@@ -98,7 +107,7 @@ export function AdminEmployees({
             {
               id: json.id,
               full_name: name,
-              email: email.trim().toLowerCase(),
+              email: syntheticEmail,
               role,
               property_id: propertyId,
               shift_type: shift,
@@ -113,6 +122,7 @@ export function AdminEmployees({
         setMsg({ ok: true, text: t("employeeCreated") });
         // reset for next entry but keep the credentials visible to copy
         setName("");
+        setUsername("");
         setPhone("");
       }
     } catch {
@@ -133,7 +143,8 @@ export function AdminEmployees({
   }
 
   function copyCreds() {
-    navigator.clipboard?.writeText(`${email}  ${password}`);
+    // Hand the receptionist their USERNAME (what they log in with) + password.
+    navigator.clipboard?.writeText(`${cleanUsername}  ${password}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   }
@@ -176,13 +187,16 @@ export function AdminEmployees({
         </label>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-[13px] font-bold text-ink">{t("emailLabel")}</span>
+          <span className="text-[13px] font-bold text-ink">{t("usernameLabel")}</span>
           <input
-            type="email"
+            type="text"
             dir="ltr"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={t("emailPlaceholder")}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder={t("usernamePlaceholder")}
             className={inputCls}
           />
         </label>
@@ -289,7 +303,7 @@ export function AdminEmployees({
         <button
           type="button"
           onClick={create}
-          disabled={busy || !email.trim() || password.length < 8 || !name.trim()}
+          disabled={busy || !cleanUsername || password.length < 8 || !name.trim()}
           className="min-h-[52px] w-full rounded-aurion bg-navy text-[16px] font-bold text-cream disabled:bg-line-strong disabled:text-[#8A8270]"
         >
           {busy ? t("creating") : t("createEmployee")}
@@ -310,10 +324,10 @@ export function AdminEmployees({
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate text-[15px] font-bold text-ink">
-                    {emp.full_name || emp.email}
+                    {emp.full_name || usernameOf(emp.email)}
                   </span>
                   <span className="truncate text-[12px] text-ink-soft" dir="ltr">
-                    {emp.email}
+                    @{usernameOf(emp.email)}
                   </span>
                   <span className="text-[12px] text-ink-soft">
                     {emp.role === "admin" ? t("roleAdmin") : t("roleReceptionist")}
