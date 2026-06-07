@@ -121,7 +121,7 @@ export function DateField({
       {open ? (
         <div
           dir={dir}
-          className="glass absolute z-50 mt-2 w-[300px] rounded-aurion p-3 shadow-xl"
+          className="absolute z-50 mt-2 w-[300px] rounded-aurion border border-line-strong bg-paper p-3 shadow-[0_12px_40px_rgba(27,42,71,0.25)]"
         >
           {/* Header: month/year + prev/next */}
           <div className="mb-2 flex items-center justify-between">
