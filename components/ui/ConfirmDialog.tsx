@@ -31,11 +31,11 @@ export function ConfirmDialog({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-navy-deep/40 px-5 backdrop-blur-sm"
       onClick={onCancel}
     >
       <div
-        className="w-full max-w-[420px] rounded-aurion bg-paper p-5 shadow-xl"
+        className="glass w-full max-w-[420px] rounded-aurion p-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-bold text-ink">{t(titleKey)}</h2>

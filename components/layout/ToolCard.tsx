@@ -22,10 +22,10 @@ export function ToolCard({
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 rounded-aurion border border-line bg-paper p-4 transition-colors hover:border-gold-deep"
+      className="glass flex items-center gap-4 rounded-aurion p-4 shadow-sm transition-all hover:border-gold-deep hover:shadow-md"
     >
       {icon ? (
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-aurion bg-gold-tint text-2xl text-gold-deep">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-aurion bg-gold-tint/80 text-2xl text-gold-deep">
           {icon}
         </span>
       ) : null}

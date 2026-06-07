@@ -33,6 +33,12 @@ export const strings = {
     ar: "نظرة يومية، الورديات الناقصة، تنبيهات النقد.",
   },
 
+  // Bottom nav (short labels)
+  navHome: { en: "Home", ar: "الرئيسية" },
+  navNew: { en: "New", ar: "جديد" },
+  navHistory: { en: "History", ar: "السجل" },
+  navManager: { en: "Manager", ar: "المدير" },
+
   // Placeholder (foundation phase — features land in later cycles)
   comingSoon: { en: "Coming soon.", ar: "قريبًا." },
 

@@ -185,7 +185,7 @@ export function HistoryList() {
       </div>
 
       {/* Filters */}
-      <section className="flex flex-col gap-4 rounded-aurion border border-line bg-paper p-4">
+      <section className="flex flex-col gap-4 glass rounded-aurion p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-[15px] font-bold text-ink">{t("filters")}</h2>
           {filtersActive ? (
@@ -317,7 +317,7 @@ function HistoryRow({ row }: { row: Row }) {
   return (
     <Link
       href={`/history/${row.id}`}
-      className="flex flex-col gap-2 rounded-aurion border border-line bg-paper p-4 transition-colors hover:border-gold-deep"
+      className="flex flex-col gap-2 glass rounded-aurion p-4 transition-colors hover:border-gold-deep"
     >
       <div className="flex items-center justify-between gap-3">
         <span className="text-[15px] font-bold text-ink">{propName ?? "—"}</span>

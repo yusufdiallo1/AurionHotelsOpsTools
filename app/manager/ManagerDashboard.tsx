@@ -26,7 +26,7 @@ import { displayDigits } from "@/lib/digits";
 
 function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-aurion border border-line bg-paper p-4">
+    <section className="glass rounded-aurion p-4">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-[15px] font-bold text-ink">{title}</h2>
         {action}
@@ -124,7 +124,7 @@ export function ManagerDashboard() {
       </div>
 
       {/* Controls */}
-      <section className="flex flex-col gap-4 rounded-aurion border border-line bg-paper p-4">
+      <section className="flex flex-col gap-4 glass rounded-aurion p-4">
         <div>
           <FieldLabel k="managerDate" htmlFor="manager-date" />
           <input

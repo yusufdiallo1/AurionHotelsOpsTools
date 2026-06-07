@@ -33,7 +33,7 @@ function Row({ label, value, red }: { label: string; value: string; red?: boolea
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-aurion border border-line bg-paper p-4">
+    <section className="glass rounded-aurion p-4">
       <h2 className="mb-2 text-[15px] font-bold text-ink">{title}</h2>
       {children}
     </section>

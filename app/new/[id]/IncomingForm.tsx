@@ -154,7 +154,7 @@ export function IncomingForm({
 
       <main className="mx-auto flex w-full max-w-[480px] flex-col gap-6 px-5 py-6">
         {/* Read-only outgoing summary */}
-        <section className="rounded-aurion border border-line bg-paper p-4">
+        <section className="glass rounded-aurion p-4">
           <h2 className="mb-2 text-[15px] font-bold text-ink">
             {t("outgoingSummary")}
           </h2>
