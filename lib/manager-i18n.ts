@@ -19,7 +19,9 @@ const M = {
   reconnecting: { en: "Reconnecting…", ar: "إعادة الاتصال…", sv: "Återansluter…" },
 
   // Scope toggle
-  scopeWeek: { en: "This week", ar: "هذا الأسبوع", sv: "Denna vecka" },
+  scopeDay: { en: "Day", ar: "يوم", sv: "Dag" },
+  scopeWeek: { en: "Week", ar: "أسبوع", sv: "Vecka" },
+  scopeMonth: { en: "Month", ar: "شهر", sv: "Månad" },
   scopeAll: { en: "All time", ar: "كل الوقت", sv: "All tid" },
 
   // Controls

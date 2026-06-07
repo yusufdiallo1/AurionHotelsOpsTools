@@ -1,6 +1,7 @@
 "use client";
 
 import { AppHeader, ToolCard } from "@/components/layout";
+import { HomeSearch } from "./HomeSearch";
 
 function Icon({ d }: { d: string }) {
   return (
@@ -25,6 +26,7 @@ export default function Home() {
       <AppHeader />
 
       <main className="mx-auto flex w-full max-w-[480px] flex-col gap-3.5 px-5 py-8">
+        <HomeSearch />
         <ToolCard
           href="/new"
           titleKey="navNewTitle"

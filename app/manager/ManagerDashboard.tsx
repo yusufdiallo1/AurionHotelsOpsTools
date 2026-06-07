@@ -29,6 +29,8 @@ import {
 
 const PAGE = 25;
 
+type Scope = "day" | "week" | "month" | "all";
+
 function dg(value: string | number, lang: ManagerLang): string {
   const s = String(value);
   return lang === "ar" ? toArabicIndicDigits(s) : s;
@@ -62,7 +64,7 @@ export function ManagerDashboard() {
   const t = (k: ManagerKey) => mt(k, lang);
   const dir = managerDir(lang);
 
-  const [scope, setScope] = useState<"week" | "all">("week");
+  const [scope, setScope] = useState<Scope>("week");
   const [selectedDate, setSelectedDate] = useState(todayIso());
   const [property, setProperty] = useState<PropertySlug | null>(null);
   const [rows, setRows] = useState<ManagerRow[]>([]);
@@ -79,15 +81,16 @@ export function ManagerDashboard() {
   }, [scope, selectedDate, property]);
 
   const load = useCallback(
-    async (s: "week" | "all", date: string, prop: PropertySlug | null) => {
+    async (s: Scope, date: string, prop: PropertySlug | null) => {
       await Promise.resolve();
       const supabase = createClient();
       let q = supabase
         .from("handovers")
         .select("*, properties(name_en, name_ar, code)")
         .order("created_at", { ascending: false });
-      if (s === "week") {
-        q = q.gte("shift_date", isoDaysBefore(date, 6)).lte("shift_date", date);
+      const windowDays = s === "day" ? 0 : s === "week" ? 6 : s === "month" ? 29 : null;
+      if (windowDays !== null) {
+        q = q.gte("shift_date", isoDaysBefore(date, windowDays)).lte("shift_date", date);
       }
       if (prop) {
         const meta = PROPERTIES.find((p) => p.slug === prop);
@@ -160,7 +163,14 @@ export function ManagerDashboard() {
   const missing = missingShifts(dayRows);
   const flags = varianceFlags(rows);
   const stats = weekStats(rows);
-  const scopeLabel = scope === "week" ? t("scopeWeek") : t("scopeAll");
+  const scopeLabel =
+    scope === "day"
+      ? t("scopeDay")
+      : scope === "week"
+        ? t("scopeWeek")
+        : scope === "month"
+          ? t("scopeMonth")
+          : t("scopeAll");
 
   return (
     <main
@@ -254,7 +264,7 @@ export function ManagerDashboard() {
       {/* Scope + filters */}
       <section className="glass flex flex-col gap-4 rounded-aurion p-4">
         <ScopeToggle scope={scope} onChange={setScope} t={t} />
-        {scope === "week" ? (
+        {scope !== "all" ? (
           <label className="flex flex-col gap-1.5">
             <span className="text-[13px] font-bold text-ink">{t("date")}</span>
             <input
@@ -422,27 +432,34 @@ function ScopeToggle({
   onChange,
   t,
 }: {
-  scope: "week" | "all";
-  onChange: (s: "week" | "all") => void;
+  scope: Scope;
+  onChange: (s: Scope) => void;
   t: (k: ManagerKey) => string;
 }) {
+  const items: { value: Scope; key: ManagerKey }[] = [
+    { value: "day", key: "scopeDay" },
+    { value: "week", key: "scopeWeek" },
+    { value: "month", key: "scopeMonth" },
+    { value: "all", key: "scopeAll" },
+  ];
   return (
-    <div className="relative grid grid-cols-2 rounded-full bg-line/60 p-1">
-      <span
-        className="absolute inset-y-1 w-[calc(50%-0.25rem)] rounded-full bg-paper shadow-sm transition-transform duration-300 ease-out"
-        style={{ transform: scope === "all" ? "translateX(calc(100% + 0.5rem))" : "translateX(0)" }}
-        aria-hidden
-      />
-      {(["week", "all"] as const).map((s) => (
-        <button
-          key={s}
-          type="button"
-          onClick={() => onChange(s)}
-          className={`relative z-10 min-h-[40px] rounded-full text-[14px] font-bold transition-colors ${scope === s ? "text-ink" : "text-ink-soft"}`}
-        >
-          {s === "week" ? t("scopeWeek") : t("scopeAll")}
-        </button>
-      ))}
+    <div className="grid grid-cols-4 gap-1 rounded-full bg-line/60 p-1">
+      {items.map((it) => {
+        const on = scope === it.value;
+        return (
+          <button
+            key={it.value}
+            type="button"
+            onClick={() => onChange(it.value)}
+            className={[
+              "min-h-[40px] rounded-full text-[13px] font-bold transition-colors",
+              on ? "bg-paper text-ink shadow-sm" : "text-ink-soft",
+            ].join(" ")}
+          >
+            {t(it.key)}
+          </button>
+        );
+      })}
     </div>
   );
 }

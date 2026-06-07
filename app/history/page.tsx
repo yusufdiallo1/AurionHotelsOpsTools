@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { AppHeader } from "@/components/layout";
 import { HistoryList } from "./HistoryList";
 
@@ -6,7 +7,9 @@ export default function HistoryPage() {
   return (
     <>
       <AppHeader titleKey="historyTitle" />
-      <HistoryList />
+      <Suspense>
+        <HistoryList />
+      </Suspense>
     </>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { LiveIndicator, SegmentedSelect, SyncBadge } from "@/components/ui";
 import { FieldLabel } from "@/components/ui/FieldLabel";
 import { useLang } from "@/lib/i18n";
@@ -13,9 +14,12 @@ import {
   formatDate,
   formatSAR,
   hasCashMismatch,
+  isoDaysBeforeToday,
   syncState,
+  todayIso,
   type Handover,
 } from "@/lib/handover";
+import { displayDigits } from "@/lib/digits";
 
 const PAGE_SIZE = 20;
 
@@ -23,6 +27,15 @@ type PropMeta = { name_en: string; name_ar: string; code: string };
 type Row = Handover & {
   properties: { name_en: string; name_ar: string } | null;
 };
+
+function nameMatches(h: Handover, name: string): boolean {
+  if (!name) return true;
+  const n = name.trim().toLowerCase();
+  return (
+    h.outgoing_name.toLowerCase().includes(n) ||
+    (h.incoming_name ?? "").toLowerCase().includes(n)
+  );
+}
 
 // Does a row satisfy the active filters? Reused for the live path so realtime
 // never injects a row the user has filtered out. (CLAUDE.md realtime)
@@ -33,6 +46,7 @@ function matchesFilters(h: Handover, f: Filters, propCode: string | undefined): 
   if (f.to && h.shift_date > f.to) return false;
   if (f.mismatchOnly && !(h.cash_variance !== null && h.cash_variance !== 0)) return false;
   if (f.property && propCode !== f.property) return false;
+  if (!nameMatches(h, f.name)) return false;
   return true;
 }
 
@@ -43,6 +57,7 @@ type Filters = {
   from: string;
   to: string;
   mismatchOnly: boolean;
+  name: string;
 };
 
 const EMPTY_FILTERS: Filters = {
@@ -52,15 +67,20 @@ const EMPTY_FILTERS: Filters = {
   from: "",
   to: "",
   mismatchOnly: false,
+  name: "",
 };
 
 export function HistoryList() {
-  const { t } = useLang();
-  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const { t, lang } = useLang();
+  const searchParams = useSearchParams();
+  const initialName = searchParams.get("name") ?? "";
+  const [filters, setFilters] = useState<Filters>({ ...EMPTY_FILTERS, name: initialName });
   const [rows, setRows] = useState<Row[]>([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  // Aggregates over ALL matching rows (not just the loaded page).
+  const [totals, setTotals] = useState<{ count: number; cash: number }>({ count: 0, cash: 0 });
   // property_id -> meta, loaded once (only 3 properties). Lets the live path
   // attach property names + evaluate the property filter without a join.
   const [propMap, setPropMap] = useState<Record<string, PropMeta>>({});
@@ -96,17 +116,14 @@ export function HistoryList() {
       await Promise.resolve();
       setLoading(true);
       const supabase = createClient();
-      let q = supabase
+      const q = supabase
         .from("handovers")
         .select("*, properties(name_en, name_ar)")
         .order("created_at", { ascending: false })
         .range(pageIndex * PAGE_SIZE, pageIndex * PAGE_SIZE + PAGE_SIZE - 1);
 
-      if (f.shift) q = q.eq("shift_type", f.shift);
-      if (f.status) q = q.eq("status", f.status);
-      if (f.from) q = q.gte("shift_date", f.from);
-      if (f.to) q = q.lte("shift_date", f.to);
-      if (f.mismatchOnly) q = q.neq("cash_variance", 0);
+      // Resolve property filter to an id once, shared by list + totals queries.
+      let propertyId: string | null = null;
       if (f.property) {
         const prop = PROPERTIES.find((p) => p.slug === f.property);
         const { data: pr } = await supabase
@@ -114,15 +131,39 @@ export function HistoryList() {
           .select("id")
           .eq("code", prop!.slug)
           .maybeSingle();
-        if (pr) q = q.eq("property_id", pr.id);
+        propertyId = pr?.id ?? null;
       }
 
-      const { data } = await q;
+      // PostgREST filter builders chain mutably; apply to any builder.
+      const term = f.name.trim() ? `%${f.name.trim()}%` : null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const applyFilters = (qq: any) => {
+        if (f.shift) qq = qq.eq("shift_type", f.shift);
+        if (f.status) qq = qq.eq("status", f.status);
+        if (f.from) qq = qq.gte("shift_date", f.from);
+        if (f.to) qq = qq.lte("shift_date", f.to);
+        if (f.mismatchOnly) qq = qq.neq("cash_variance", 0);
+        if (propertyId) qq = qq.eq("property_id", propertyId);
+        if (term) qq = qq.or(`outgoing_name.ilike.${term},incoming_name.ilike.${term}`);
+        return qq;
+      };
+
+      const { data } = await applyFilters(q);
       const batch = (data ?? []) as Row[];
       setHasMore(batch.length === PAGE_SIZE);
       setRows((prev) => (pageIndex === 0 ? batch : [...prev, ...batch]));
       setPage(pageIndex);
       setLoading(false);
+
+      // Aggregates over ALL matching rows (count + total cash in drawer).
+      const { data: allRows, count } = await applyFilters(
+        supabase.from("handovers").select("cash_drawer", { count: "exact" }),
+      );
+      const cash = (allRows ?? []).reduce(
+        (sum: number, r: { cash_drawer: number }) => sum + Number(r.cash_drawer ?? 0),
+        0,
+      );
+      setTotals({ count: count ?? allRows?.length ?? 0, cash });
     },
     [],
   );
@@ -176,7 +217,29 @@ export function HistoryList() {
     !!filters.status ||
     !!filters.from ||
     !!filters.to ||
-    filters.mismatchOnly;
+    filters.mismatchOnly ||
+    !!filters.name;
+
+  // Active date-range preset (for highlighting the preset buttons).
+  const activeRange =
+    filters.from === "" && filters.to === ""
+      ? "all"
+      : filters.from === todayIso() && filters.to === todayIso()
+        ? "today"
+        : filters.from === isoDaysBeforeToday(6) && filters.to === todayIso()
+          ? "7d"
+          : filters.from === isoDaysBeforeToday(29) && filters.to === todayIso()
+            ? "30d"
+            : "custom";
+
+  function setRange(preset: "today" | "7d" | "30d" | "all") {
+    setFilters((f) => {
+      if (preset === "all") return { ...f, from: "", to: "" };
+      if (preset === "today") return { ...f, from: todayIso(), to: todayIso() };
+      if (preset === "7d") return { ...f, from: isoDaysBeforeToday(6), to: todayIso() };
+      return { ...f, from: isoDaysBeforeToday(29), to: todayIso() };
+    });
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-[480px] flex-col gap-5 px-5 py-6">
@@ -197,6 +260,18 @@ export function HistoryList() {
               {t("clearFilters")}
             </button>
           ) : null}
+        </div>
+
+        {/* Reception name search */}
+        <div>
+          <FieldLabel k="filterName" />
+          <input
+            type="text"
+            value={filters.name}
+            onChange={(e) => setFilters((f) => ({ ...f, name: e.target.value }))}
+            placeholder={t("filterNamePlaceholder")}
+            className="min-h-[52px] w-full rounded-aurion border border-line bg-paper px-4 text-ink placeholder:text-muted outline-none focus:border-gold-deep"
+          />
         </div>
 
         <div>
@@ -241,6 +316,37 @@ export function HistoryList() {
           />
         </div>
 
+        {/* Date range presets */}
+        <div>
+          <FieldLabel k="filterFrom" />
+          <div className="flex flex-wrap gap-2">
+            {([
+              ["all", "rangeAll"],
+              ["today", "rangeToday"],
+              ["7d", "range7d"],
+              ["30d", "range30d"],
+            ] as const).map(([preset, key]) => {
+              const on = activeRange === preset;
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setRange(preset)}
+                  className={[
+                    "min-h-[40px] rounded-full px-4 text-[14px] font-bold transition-colors",
+                    on
+                      ? "bg-navy text-cream"
+                      : "border border-line bg-paper text-ink-soft",
+                  ].join(" ")}
+                >
+                  {t(key)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Custom from/to */}
         <div className="grid grid-cols-2 gap-3">
           <div>
             <FieldLabel k="filterFrom" />
@@ -276,6 +382,16 @@ export function HistoryList() {
           <span className="text-[15px] text-ink">{t("filterMismatchOnly")}</span>
         </label>
       </section>
+
+      {/* Results summary — aggregates over ALL matching handovers */}
+      <div className="glass-cream flex items-center justify-between rounded-aurion px-4 py-3">
+        <span className="text-[14px] font-bold text-ink">
+          {displayDigits(totals.count, lang)} {t("resultsCount")}
+        </span>
+        <span className="text-[13px] text-ink-soft">
+          {t("totalDrawer")}: <span className="font-bold text-ink">{formatSAR(totals.cash, lang)}</span>
+        </span>
+      </div>
 
       {/* List */}
       {loading && rows.length === 0 ? (

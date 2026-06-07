@@ -23,6 +23,14 @@ export function todayIso(): string {
   return new Date(d.getTime() - tz).toISOString().slice(0, 10);
 }
 
+/** YYYY-MM-DD `days` before today (local). For date-range presets. */
+export function isoDaysBeforeToday(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  const tz = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - tz).toISOString().slice(0, 10);
+}
+
 /**
  * Format an amount as SAR with thousands separators, localising digits in AR.
  * `value` is a Western-form number or numeric string (source of truth).

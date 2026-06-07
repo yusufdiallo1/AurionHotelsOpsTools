@@ -50,23 +50,48 @@ function buildStyles(rtl: boolean) {
       fontFamily: "PlexArabic",
       fontSize: 11,
       color: INK,
-      paddingTop: 36,
-      paddingBottom: 40,
-      paddingHorizontal: 40,
+      paddingTop: 0,
+      paddingBottom: 56,
+      paddingHorizontal: 0,
       direction: rtl ? "rtl" : "ltr",
     },
-    header: {
+    body: { paddingHorizontal: 40, paddingTop: 22 },
+    // Gold accent bar across the very top (brand).
+    accent: { height: 6, backgroundColor: GOLD },
+    // Navy header band, like the app header.
+    headerBand: {
+      backgroundColor: NAVY,
       flexDirection: flexDir,
       alignItems: "center",
       justifyContent: "space-between",
-      borderBottomWidth: 2,
-      borderBottomColor: GOLD,
-      paddingBottom: 12,
-      marginBottom: 18,
+      paddingVertical: 18,
+      paddingHorizontal: 40,
     },
-    brand: { fontSize: 20, fontWeight: 700, color: NAVY, letterSpacing: 2 },
-    title: { fontSize: 12, color: INK_SOFT, textAlign: align },
-    logo: { width: 44, height: 44 },
+    headerText: { flexDirection: "column" },
+    brand: { fontSize: 22, fontWeight: 700, color: "#F6F1E7", letterSpacing: 3 },
+    title: { fontSize: 11, color: "#BBA46A", marginTop: 2, textAlign: align },
+    logoCircle: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
+      backgroundColor: "#F6F1E7",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    logo: { width: 38, height: 38 },
+    footer: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      borderTopWidth: 1,
+      borderTopColor: LINE,
+      paddingVertical: 12,
+      paddingHorizontal: 40,
+      flexDirection: flexDir,
+      justifyContent: "space-between",
+    },
+    footerText: { fontSize: 8, color: INK_SOFT },
     section: { marginBottom: 14 },
     sectionTitle: {
       fontSize: 12,
@@ -139,14 +164,21 @@ export function HandoverPdf({
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <View>
+        {/* Brand: gold accent + navy header band with logo on a cream circle */}
+        <View style={styles.accent} />
+        <View style={styles.headerBand}>
+          <View style={styles.headerText}>
             <Text style={styles.brand}>AURION</Text>
             <Text style={styles.title}>{t("detailTitle")}</Text>
           </View>
-          {logoSrc ? <Image src={logoSrc} style={styles.logo} /> : null}
+          {logoSrc ? (
+            <View style={styles.logoCircle}>
+              <Image src={logoSrc} style={styles.logo} />
+            </View>
+          ) : null}
         </View>
 
+        <View style={styles.body}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t("outgoingSummary")}</Text>
           <PdfRow styles={styles} label={t("propertyLabel")} value={data.propertyName} />
@@ -193,6 +225,13 @@ export function HandoverPdf({
             label={`${t("sectionIncoming")} — ${t("signedAt")}`}
             value={ts(data.incoming_signed_at)}
           />
+        </View>
+        </View>
+
+        {/* Branded footer */}
+        <View style={styles.footer} fixed>
+          <Text style={styles.footerText}>AURION · {t("appName")}</Text>
+          <Text style={styles.footerText}>{ts(data.created_at)}</Text>
         </View>
       </Page>
     </Document>

@@ -88,7 +88,7 @@ export const strings = {
   // Step 1 — outgoing
   step1Title: { en: "End of shift", ar: "نهاية الوردية" },
   fieldDate: { en: "Date", ar: "التاريخ" },
-  fieldYourName: { en: "Your name", ar: "اسمك" },
+  fieldYourName: { en: "Outgoing reception name", ar: "اسم موظف الاستقبال المُسلِّم" },
   fieldYourNamePlaceholder: { en: "Outgoing receptionist", ar: "موظف الاستقبال المُسلِّم" },
   fieldRooms: { en: "Rooms occupied", ar: "الغرف المشغولة" },
   fieldCashDrawer: { en: "Cash in drawer (SAR)", ar: "النقد في الدرج (ر.س)" },
@@ -108,7 +108,7 @@ export const strings = {
   // Step 2 — incoming
   step2Title: { en: "Receive shift", ar: "استلام الوردية" },
   outgoingSummary: { en: "Outgoing summary", ar: "ملخّص الوردية المُسلَّمة" },
-  fieldIncomingName: { en: "Your name (incoming)", ar: "اسمك (المستلم)" },
+  fieldIncomingName: { en: "Incoming reception name", ar: "اسم موظف الاستقبال المستلم" },
   fieldIncomingNamePlaceholder: { en: "Incoming receptionist", ar: "موظف الاستقبال المستلم" },
   fieldCashRecount: { en: "Recount the cash drawer (SAR)", ar: "أعد عدّ النقد في الدرج (ر.س)" },
   expectedLabel: { en: "Expected", ar: "المتوقَّع" },
@@ -154,6 +154,24 @@ export const strings = {
   loadMore: { en: "Load more", ar: "تحميل المزيد" },
   noHandovers: { en: "No handovers match.", ar: "لا توجد تسليمات مطابقة." },
   toLabel: { en: "to", ar: "إلى" },
+
+  // Name search + date presets
+  filterName: { en: "Reception name", ar: "اسم موظف الاستقبال" },
+  filterNamePlaceholder: { en: "Search outgoing or incoming…", ar: "ابحث في المُسلِّم أو المستلم…" },
+  rangeToday: { en: "Today", ar: "اليوم" },
+  range7d: { en: "7 days", ar: "٧ أيام" },
+  range30d: { en: "30 days", ar: "٣٠ يومًا" },
+  rangeCustom: { en: "Custom", ar: "مخصّص" },
+  rangeAll: { en: "All", ar: "الكل" },
+
+  // History summary (aggregates from saved data)
+  resultsCount: { en: "handovers", ar: "تسليمات" },
+  totalDrawer: { en: "Total cash in drawer", ar: "إجمالي النقد في الدرج" },
+
+  // Home search
+  searchReception: { en: "Find a receptionist", ar: "ابحث عن موظف استقبال" },
+  searchReceptionPlaceholder: { en: "Type a name…", ar: "اكتب اسمًا…" },
+  search: { en: "Search", ar: "بحث" },
 
   // Sync badges
   syncSynced: { en: "Synced", ar: "متزامن" },
