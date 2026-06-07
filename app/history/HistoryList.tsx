@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { LiveIndicator, SegmentedSelect, SyncBadge } from "@/components/ui";
+import { DateField, LiveIndicator, SegmentedSelect, SyncBadge } from "@/components/ui";
 import { FieldLabel } from "@/components/ui/FieldLabel";
 import { useLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
@@ -368,26 +368,16 @@ export function HistoryList() {
 
         {/* Custom from/to */}
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <FieldLabel k="filterFrom" />
-            <input
-              type="date"
-              dir="ltr"
-              value={filters.from}
-              onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
-              className="min-h-[52px] w-full rounded-aurion border border-line bg-paper px-3 text-ink outline-none focus:border-gold-deep"
-            />
-          </div>
-          <div>
-            <FieldLabel k="filterTo" />
-            <input
-              type="date"
-              dir="ltr"
-              value={filters.to}
-              onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
-              className="min-h-[52px] w-full rounded-aurion border border-line bg-paper px-3 text-ink outline-none focus:border-gold-deep"
-            />
-          </div>
+          <DateField
+            labelKey="filterFrom"
+            value={filters.from}
+            onChange={(v) => setFilters((f) => ({ ...f, from: v }))}
+          />
+          <DateField
+            labelKey="filterTo"
+            value={filters.to}
+            onChange={(v) => setFilters((f) => ({ ...f, to: v }))}
+          />
         </div>
 
         <label className="flex min-h-[44px] items-center gap-3">

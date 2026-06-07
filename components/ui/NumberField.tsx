@@ -51,7 +51,7 @@ export function NumberField({
           value={shown}
           onChange={(e) => handleChange(e.target.value)}
           placeholder={placeholderKey ? t(placeholderKey) : undefined}
-          className="min-h-[52px] w-full rounded-aurion border border-line bg-paper-tint px-4 text-ink placeholder:text-muted outline-none transition-colors focus:border-gold-deep"
+          className="min-h-[52px] w-full rounded-aurion border border-line bg-paper px-4 text-ink placeholder:text-muted outline-none transition-colors focus:border-gold-deep"
         />
         {suffix ? (
           <span className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-sm font-medium text-ink-soft">

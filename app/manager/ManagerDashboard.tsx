@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import { signOut } from "@/lib/sign-out";
+import { DateField } from "@/components/ui";
 import { ActivityLog } from "./ActivityLog";
 import { useHandoverRealtime, type RealtimeStatus } from "@/lib/useHandoverRealtime";
 import { useIdleLock } from "@/lib/useIdleLock";
@@ -276,16 +277,10 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
       <section className="glass flex flex-col gap-4 rounded-aurion p-4">
         <ScopeToggle scope={scope} onChange={setScope} t={t} />
         {scope !== "all" ? (
-          <label className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5">
             <span className="text-[13px] font-bold text-ink">{t("date")}</span>
-            <input
-              type="date"
-              dir="ltr"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="min-h-[48px] w-full rounded-aurion border border-line bg-paper px-4 text-ink outline-none focus:border-gold-deep"
-            />
-          </label>
+            <DateField value={selectedDate} onChange={setSelectedDate} />
+          </div>
         ) : null}
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] font-bold text-ink">{t("property")}</span>

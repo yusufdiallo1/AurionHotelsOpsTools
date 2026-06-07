@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AppHeader } from "@/components/layout";
 import {
+  DateField,
   NumberField,
   PrimaryButton,
   PropertyPicker,
@@ -56,6 +57,7 @@ export default function StyleguidePage() {
   const [notes, setNotes] = useState("");
   const [shift, setShift] = useState<string | null>(null);
   const [property, setProperty] = useState<PropertySlug | null>(null);
+  const [demoDate, setDemoDate] = useState("2026-06-07");
 
   return (
     <>
@@ -91,6 +93,10 @@ export default function StyleguidePage() {
           <p className="font-ar text-[17px] font-bold text-ink" dir="rtl">
             IBM Plex Sans Arabic — الخط العربي
           </p>
+        </Section>
+
+        <Section title="Date picker">
+          <DateField labelKey="fieldDate" value={demoDate} onChange={setDemoDate} />
         </Section>
 
         <Section title="Text fields">

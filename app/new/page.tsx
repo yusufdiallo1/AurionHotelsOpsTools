@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/layout";
 import {
   ConfirmDialog,
+  DateField,
   NumberField,
   PrimaryButton,
   PropertyPicker,
@@ -254,17 +255,7 @@ export default function NewHandoverPage() {
       ) : null}
 
       <main className="mx-auto flex w-full max-w-[480px] flex-col gap-6 px-5 py-6">
-        <div>
-          <FieldLabel k="fieldDate" htmlFor="shift-date" />
-          <input
-            id="shift-date"
-            type="date"
-            value={d.shiftDate}
-            onChange={(e) => set("shiftDate", e.target.value)}
-            dir="ltr"
-            className="min-h-[52px] w-full rounded-aurion border border-line bg-paper px-4 text-ink outline-none focus:border-gold-deep"
-          />
-        </div>
+        <DateField labelKey="fieldDate" value={d.shiftDate} onChange={(v) => set("shiftDate", v)} />
 
         <PropertyPicker value={d.property} onChange={(v) => set("property", v)} />
 
