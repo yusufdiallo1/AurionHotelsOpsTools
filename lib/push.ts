@@ -65,14 +65,17 @@ export async function notifyIncoming(handoverId: string): Promise<void> {
     .maybeSingle();
   if (!h) return;
 
-  // All active receptionists at this hotel.
-  const { data: all } = await admin
+  // Active receptionists at this hotel, PLUS floating cover staff (no fixed
+  // property) who can work either hotel.
+  const { data: roster } = await admin
     .from("profiles")
-    .select("id, full_name, shift_type, work_days")
+    .select("id, full_name, shift_type, work_days, property_id")
     .eq("role", "receptionist")
-    .eq("active", true)
-    .eq("property_id", h.property_id);
-  if (!all?.length) return;
+    .eq("active", true);
+  const all = (roster ?? []).filter(
+    (p) => p.property_id === h.property_id || p.property_id === null,
+  );
+  if (!all.length) return;
 
   const todayDow = new Date().getDay(); // 0=Sun … 6=Sat
   const nextShift = NEXT_SHIFT[h.shift_type] ?? null;
