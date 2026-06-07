@@ -209,6 +209,7 @@ export type Database = {
           property_id: string | null
           role: string
           shift_type: string | null
+          work_days: number[]
         }
         Insert: {
           active?: boolean
@@ -220,6 +221,7 @@ export type Database = {
           property_id?: string | null
           role?: string
           shift_type?: string | null
+          work_days?: number[]
         }
         Update: {
           active?: boolean
@@ -231,6 +233,7 @@ export type Database = {
           property_id?: string | null
           role?: string
           shift_type?: string | null
+          work_days?: number[]
         }
         Relationships: [
           {

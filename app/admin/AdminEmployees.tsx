@@ -15,8 +15,20 @@ export type EmployeeRow = {
   phone: string | null;
   active: boolean;
   created_at: string | null;
+  work_days: number[] | null;
 };
 type Property = { id: string; code: string; name_en: string; name_ar: string };
+
+// 0=Sun … 6=Sat — matches JS Date.getDay() and the work_days column.
+const DOW: { day: number; k: "dowSun" | "dowMon" | "dowTue" | "dowWed" | "dowThu" | "dowFri" | "dowSat" }[] = [
+  { day: 0, k: "dowSun" },
+  { day: 1, k: "dowMon" },
+  { day: 2, k: "dowTue" },
+  { day: 3, k: "dowWed" },
+  { day: 4, k: "dowThu" },
+  { day: 5, k: "dowFri" },
+  { day: 6, k: "dowSat" },
+];
 
 function randomPassword(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
@@ -44,7 +56,10 @@ export function AdminEmployees({
   const [password, setPassword] = useState(randomPassword());
   const [propertyId, setPropertyId] = useState<string>(properties[0]?.id ?? "");
   const [shift, setShift] = useState<string>("morning");
+  const [workDays, setWorkDays] = useState<number[]>([0, 1, 2, 3, 4]); // Sun–Thu default
   const [phone, setPhone] = useState("");
+  const toggleDay = (d: number) =>
+    setWorkDays((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort()));
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -69,6 +84,7 @@ export function AdminEmployees({
           role,
           property_id: role === "receptionist" ? propertyId : null,
           shift_type: role === "receptionist" ? shift : null,
+          work_days: role === "receptionist" ? workDays : [],
           phone: phone.trim() || null,
         }),
       });
@@ -86,6 +102,7 @@ export function AdminEmployees({
               role,
               property_id: propertyId,
               shift_type: shift,
+              work_days: workDays,
               phone: phone.trim() || null,
               active: true,
               created_at: new Date().toISOString(),
@@ -228,6 +245,27 @@ export function AdminEmployees({
               </div>
             </div>
 
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[13px] font-bold text-ink">{t("workDaysLabel")}</span>
+              <div className="grid grid-cols-7 gap-1.5">
+                {DOW.map(({ day, k }) => (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => toggleDay(day)}
+                    className={[
+                      "min-h-[40px] rounded-aurion px-0.5 text-[12px] transition-colors",
+                      workDays.includes(day)
+                        ? "border-2 border-gold bg-gold-tint font-bold text-ink"
+                        : "border border-line bg-paper text-ink-soft",
+                    ].join(" ")}
+                  >
+                    {t(k)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <label className="flex flex-col gap-1.5">
               <span className="text-[13px] font-bold text-ink">{t("phoneLabel")}</span>
               <input type="tel" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} maxLength={30} />
@@ -286,6 +324,15 @@ export function AdminEmployees({
                       ? ` · ${t(SHIFT_OPTIONS.find((s) => s.value === emp.shift_type)?.k ?? "shiftLabel")}`
                       : ""}
                   </span>
+                  {emp.work_days && emp.work_days.length > 0 ? (
+                    <span className="text-[11px] text-muted">
+                      {emp.work_days
+                        .slice()
+                        .sort((a, b) => a - b)
+                        .map((d) => t(DOW.find((x) => x.day === d)!.k))
+                        .join(" · ")}
+                    </span>
+                  ) : null}
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
                   <span

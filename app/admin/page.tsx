@@ -15,7 +15,7 @@ export default async function AdminPage() {
   const [{ data: profiles }, { data: properties }] = await Promise.all([
     admin
       .from("profiles")
-      .select("id, full_name, email, role, property_id, shift_type, phone, active, created_at")
+      .select("id, full_name, email, role, property_id, shift_type, phone, active, created_at, work_days")
       .eq("role", "receptionist") // employees list = receptionists only (admins managed separately)
       .order("created_at", { ascending: false }),
     admin.from("properties").select("id, code, name_en, name_ar"),

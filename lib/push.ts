@@ -49,22 +49,48 @@ export async function pushToUser(userId: string, payload: PushPayload): Promise<
  * insert an in-app notification row + send Web Push. Targets active receptionists
  * of the property (optionally the matching incoming shift). Best-effort.
  */
+// Shift rotation: the incoming shift is the one AFTER the outgoing shift.
+const NEXT_SHIFT: Record<string, string> = {
+  morning: "afternoon",
+  afternoon: "night",
+  night: "morning",
+};
+
 export async function notifyIncoming(handoverId: string): Promise<void> {
   const admin = createServiceClient();
   const { data: h } = await admin
     .from("handovers")
-    .select("id, property_id, shift_type, properties(name_en, name_ar)")
+    .select("id, property_id, shift_type, outgoing_name, properties(name_en, name_ar)")
     .eq("id", handoverId)
     .maybeSingle();
   if (!h) return;
 
-  const { data: recipients } = await admin
+  // All active receptionists at this hotel.
+  const { data: all } = await admin
     .from("profiles")
-    .select("id")
+    .select("id, full_name, shift_type, work_days")
     .eq("role", "receptionist")
     .eq("active", true)
     .eq("property_id", h.property_id);
-  if (!recipients?.length) return;
+  if (!all?.length) return;
+
+  const todayDow = new Date().getDay(); // 0=Sun … 6=Sat
+  const nextShift = NEXT_SHIFT[h.shift_type] ?? null;
+  const outgoing = (h.outgoing_name ?? "").trim().toLowerCase();
+
+  // Prefer: works today + is the next shift + isn't the outgoing person.
+  const worksToday = (p: { work_days: number[] | null }) =>
+    !p.work_days || p.work_days.length === 0 || p.work_days.includes(todayDow);
+  const notOutgoing = (p: { full_name: string }) =>
+    (p.full_name ?? "").trim().toLowerCase() !== outgoing;
+
+  let recipients = all.filter(
+    (p) => worksToday(p) && notOutgoing(p) && (!nextShift || p.shift_type === nextShift),
+  );
+  // Fallbacks: anyone working today (not outgoing); else everyone but outgoing.
+  if (recipients.length === 0) recipients = all.filter((p) => worksToday(p) && notOutgoing(p));
+  if (recipients.length === 0) recipients = all.filter(notOutgoing);
+  if (recipients.length === 0) return;
 
   const hotel =
     (h.properties as { name_en?: string } | null)?.name_en ?? "the hotel";

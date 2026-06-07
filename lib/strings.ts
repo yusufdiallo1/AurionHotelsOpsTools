@@ -36,6 +36,14 @@ export const strings = {
   roleAdmin: { en: "Admin", ar: "مدير" },
   receptionNameLabel: { en: "Reception name", ar: "اسم موظف الاستقبال" },
   shiftTimeLabel: { en: "Shift", ar: "الوردية" },
+  workDaysLabel: { en: "Working days", ar: "أيام العمل" },
+  dowSun: { en: "Sun", ar: "أحد" },
+  dowMon: { en: "Mon", ar: "إثن" },
+  dowTue: { en: "Tue", ar: "ثلا" },
+  dowWed: { en: "Wed", ar: "أرب" },
+  dowThu: { en: "Thu", ar: "خمي" },
+  dowFri: { en: "Fri", ar: "جمع" },
+  dowSat: { en: "Sat", ar: "سبت" },
   phoneLabel: { en: "Phone (optional)", ar: "الهاتف (اختياري)" },
   tempPasswordLabel: { en: "Temporary password", ar: "كلمة مرور مؤقتة" },
   generate: { en: "Generate", ar: "توليد" },
@@ -247,6 +255,16 @@ export const strings = {
   incomingHandoverBody: { en: "A shift is being handed to you.", ar: "هناك وردية تُسلَّم إليك." },
   openHandover: { en: "Open handover", ar: "فتح التسليم" },
   dismiss: { en: "Dismiss", ar: "تجاهل" },
+
+  // Outgoing waiting → confirmed banner
+  waitingTitle: { en: "Handover submitted", ar: "تم إرسال التسليم" },
+  waitingForConfirm: {
+    en: "Waiting for the incoming receptionist to confirm…",
+    ar: "في انتظار تأكيد موظف الاستقبال المُستلِم…",
+  },
+  confirmedTitle: { en: "Confirmed", ar: "تم التأكيد" },
+  confirmedBy: { en: "Confirmed by", ar: "أكّده" },
+  backHome: { en: "Back to home", ar: "العودة للرئيسية" },
 
   // ── Manager: passcode gate ───────────────────────────────────────
   managerTitle: { en: "Manager", ar: "المدير" },

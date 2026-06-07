@@ -10,6 +10,7 @@ type Body = {
   property_id?: string | null;
   shift_type?: "night" | "morning" | "afternoon" | null;
   phone?: string | null;
+  work_days?: number[] | null;
 };
 
 // Create an employee (admin or receptionist). Admin-only. Uses the Auth admin API
@@ -59,6 +60,7 @@ export async function POST(req: Request) {
       email,
       property_id: role === "receptionist" ? (body.property_id ?? null) : null,
       shift_type: role === "receptionist" ? (body.shift_type ?? null) : null,
+      work_days: role === "receptionist" ? (body.work_days ?? []) : [],
       phone: body.phone ?? null,
       active: true,
     })
@@ -92,6 +94,7 @@ export async function PATCH(req: Request) {
   if (b.property_id !== undefined) patch.property_id = b.property_id;
   if (b.shift_type !== undefined) patch.shift_type = b.shift_type;
   if (b.phone !== undefined) patch.phone = b.phone;
+  if (b.work_days !== undefined && b.work_days !== null) patch.work_days = b.work_days;
   if (typeof b.active === "boolean") patch.active = b.active;
   const { error } = await admin.from("profiles").update(patch).eq("id", body.id);
   if (error) return Response.json({ ok: false, error: error.message }, { status: 400 });
