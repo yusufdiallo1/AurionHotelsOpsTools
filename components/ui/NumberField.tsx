@@ -27,8 +27,9 @@ export function NumberField({
   mode?: "money" | "integer";
   suffix?: string;
 }) {
-  const { t } = useLang();
+  const { t, dir } = useLang();
   const id = useId();
+  const rtl = dir === "rtl";
 
   // Numerals are always Latin/Western (client requirement); input stays LTR.
   const shown = value;
@@ -47,14 +48,26 @@ export function NumberField({
           id={id}
           type="text"
           inputMode={mode === "integer" ? "numeric" : "decimal"}
+          // Digits are Latin and read LTR; in AR the field right-aligns so the
+          // number sits on the right and the suffix sits on the left without overlap.
           dir="ltr"
+          style={{ textAlign: rtl ? "right" : "left" }}
           value={shown}
           onChange={(e) => handleChange(e.target.value)}
           placeholder={placeholderKey ? t(placeholderKey) : undefined}
-          className="min-h-[52px] w-full rounded-aurion border border-line bg-paper px-4 text-ink placeholder:text-muted outline-none transition-colors focus:border-gold-deep"
+          className={[
+            "min-h-[52px] w-full rounded-aurion border border-line bg-paper text-ink placeholder:text-muted outline-none transition-colors focus:border-gold-deep",
+            // Reserve room for the suffix on the side it sits on.
+            suffix ? (rtl ? "ps-14 pe-4" : "pe-14 ps-4") : "px-4",
+          ].join(" ")}
         />
         {suffix ? (
-          <span className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-sm font-medium text-ink-soft">
+          <span
+            className={[
+              "pointer-events-none absolute top-1/2 -translate-y-1/2 text-sm font-medium text-ink-soft",
+              rtl ? "left-4" : "right-4",
+            ].join(" ")}
+          >
             {suffix}
           </span>
         ) : null}

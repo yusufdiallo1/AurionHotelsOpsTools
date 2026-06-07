@@ -32,12 +32,13 @@ export default async function ContinueHandoverPage({
     .eq("id", handover.property_id)
     .maybeSingle();
 
-  // Is the viewer the outgoing receptionist? (match their profile name)
+  // Is the viewer the outgoing receptionist? (match their profile name, whitespace-insensitive)
+  const norm = (s: string | null | undefined) =>
+    (s ?? "").trim().replace(/\s+/g, " ").toLowerCase();
   const session = await getSessionProfile();
-  const viewerName = session?.profile.full_name?.trim().toLowerCase() ?? "";
-  const outgoingName = handover.outgoing_name?.trim().toLowerCase() ?? "";
+  const viewerName = norm(session?.profile.full_name);
   const isOutgoing =
-    session?.role === "receptionist" && viewerName !== "" && viewerName === outgoingName;
+    session?.role === "receptionist" && viewerName !== "" && viewerName === norm(handover.outgoing_name);
 
   if (isOutgoing) {
     return (

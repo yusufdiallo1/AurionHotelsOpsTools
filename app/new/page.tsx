@@ -133,7 +133,9 @@ export default function NewHandoverPage() {
         const raw = localStorage.getItem(DRAFT_KEY);
         if (!raw) return;
         const saved = JSON.parse(raw) as Draft;
-        if (saved.name || saved.property || saved.cash || saved.rooms) {
+        // Only the fields a user actually fills count as "real" draft content —
+        // a receptionist's pre-filled name/hotel/shift shouldn't trigger a restore.
+        if (saved.cash || saved.rooms || saved.pending || saved.maintenance || saved.notes) {
           setRestorable(saved);
         }
       } catch {
@@ -147,8 +149,9 @@ export default function NewHandoverPage() {
 
   // Autosave as the user types (debounced lightly via effect on `d`).
   useEffect(() => {
-    const isDirty =
-      d.name || d.property || d.shift || d.rooms || d.cash || d.pending || d.maintenance || d.notes;
+    // "Dirty" = the user actually entered handover data. Identity (name/hotel/shift)
+    // is excluded so a receptionist's pre-filled profile doesn't create a phantom draft.
+    const isDirty = d.rooms || d.cash || d.pending || d.maintenance || d.notes;
     dirtyRef.current = !!isDirty && !submitting;
     if (isDirty) {
       try {
