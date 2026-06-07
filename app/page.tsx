@@ -32,12 +32,14 @@ export default function Home() {
       <main className="mx-auto flex w-full max-w-[480px] flex-col gap-3.5 px-5 py-8">
         {isAdmin ? <HomeSearch /> : null}
 
-        <ToolCard
-          href="/new"
-          titleKey="navNewTitle"
-          descKey="navNewDesc"
-          icon={<Icon d="M12 5v14M5 12h14" />}
-        />
+        {!isAdmin ? (
+          <ToolCard
+            href="/new"
+            titleKey="navNewTitle"
+            descKey="navNewDesc"
+            icon={<Icon d="M12 5v14M5 12h14" />}
+          />
+        ) : null}
 
         {isAdmin ? (
           <>

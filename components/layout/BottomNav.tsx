@@ -12,6 +12,7 @@ type NavItem = {
   icon: React.ReactNode;
   match: (path: string) => boolean;
   adminOnly?: boolean;
+  receptionistOnly?: boolean;
 };
 
 const ITEMS: NavItem[] = [
@@ -26,6 +27,7 @@ const ITEMS: NavItem[] = [
     labelKey: "navNew",
     match: (p) => p.startsWith("/new"),
     icon: <path d="M12 5v14M5 12h14" />,
+    receptionistOnly: true,
   },
   {
     href: "/history",
@@ -54,8 +56,13 @@ export function AppNav() {
 
   if (pathname.startsWith("/styleguide") || pathname.startsWith("/login")) return null;
 
-  // Receptionists see Home + New only; admins see everything.
-  const items = ITEMS.filter((it) => !it.adminOnly || role === "admin");
+  // Receptionists see Home + New; admins see Home + History + Manager (no New —
+  // receptionists file handovers).
+  const items = ITEMS.filter((it) => {
+    if (it.adminOnly) return role === "admin";
+    if (it.receptionistOnly) return role === "receptionist";
+    return true;
+  });
   const activeIndex = Math.max(
     0,
     items.findIndex((it) => it.match(pathname)),
