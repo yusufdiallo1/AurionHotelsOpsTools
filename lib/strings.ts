@@ -235,6 +235,7 @@ export const strings = {
   syncedAtLabel: { en: "Synced at", ar: "تمت المزامنة في" },
   downloadPdf: { en: "Download PDF", ar: "تنزيل PDF" },
   preparingPdf: { en: "Preparing…", ar: "جارٍ التجهيز…" },
+  viewInDrive: { en: "View in Google Drive", ar: "عرض في Google Drive" },
 
   // ── Realtime ─────────────────────────────────────────────────────
   live: { en: "Live", ar: "مباشر" },

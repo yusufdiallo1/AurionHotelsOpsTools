@@ -204,6 +204,16 @@ export function HandoverDetail({ handover, propertyNameEn, propertyNameAr }: Pro
         {resyncMsg ? (
           <p className="mt-2 text-[13px] text-ink-soft">{resyncMsg}</p>
         ) : null}
+        {row.drive_file_id ? (
+          <a
+            href={`https://drive.google.com/file/d/${row.drive_file_id}/view`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-block text-[13px] font-bold text-gold-deep"
+          >
+            {t("viewInDrive")} ↗
+          </a>
+        ) : null}
       </Card>
 
       <button

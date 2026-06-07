@@ -1,5 +1,6 @@
 import { getSessionProfile } from "@/lib/auth";
 import { notifyIncoming } from "@/lib/push";
+import { logAudit } from "@/lib/audit";
 
 // Fire the incoming-handover notification + Web Push for a just-created handover.
 // Called by the wizard right after Step 1 inserts the pending handover.
@@ -20,5 +21,11 @@ export async function POST(req: Request) {
   } catch {
     // Best-effort: never block the handover on a notification failure.
   }
+  await logAudit({
+    action: "handover_created",
+    handoverId: id,
+    actorId: session.userId,
+    actorName: session.profile.full_name,
+  });
   return Response.json({ ok: true });
 }

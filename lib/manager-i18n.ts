@@ -82,6 +82,15 @@ const M = {
     ar: "تم القفل تلقائيًا بعد فترة خمول.",
     sv: "Låst av säkerhetsskäl efter inaktivitet.",
   },
+
+  // Activity / audit log
+  activity: { en: "Activity", ar: "النشاط", sv: "Aktivitet" },
+  activityNone: { en: "No activity yet.", ar: "لا يوجد نشاط بعد.", sv: "Ingen aktivitet än." },
+  actCreated: { en: "New handover started", ar: "بدأ تسليم جديد", sv: "Ny överlämning startad" },
+  actCompleted: { en: "Handover completed", ar: "اكتمل التسليم", sv: "Överlämning slutförd" },
+  actSynced: { en: "Synced to Sheets", ar: "تمت المزامنة مع الجدول", sv: "Synkad till Sheets" },
+  actDrive: { en: "Archived to Drive", ar: "تم الحفظ في Drive", sv: "Arkiverad till Drive" },
+  viewItem: { en: "View", ar: "عرض", sv: "Visa" },
 } as const satisfies Record<string, Entry>;
 
 export type ManagerKey = keyof typeof M;

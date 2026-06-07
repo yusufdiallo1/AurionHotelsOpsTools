@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import { signOut } from "@/lib/sign-out";
+import { ActivityLog } from "./ActivityLog";
 import { useHandoverRealtime, type RealtimeStatus } from "@/lib/useHandoverRealtime";
 import { useIdleLock } from "@/lib/useIdleLock";
 import { PROPERTIES, type PropertySlug } from "@/lib/properties";
@@ -362,6 +363,9 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
           </ul>
         )}
       </Card>
+
+      {/* Live activity feed (audit log) */}
+      <ActivityLog lang={lang} />
 
       {/* All / recent handovers */}
       <Card title={scope === "all" ? t("allHandovers") : t("recent")}>

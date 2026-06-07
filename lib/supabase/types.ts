@@ -15,12 +15,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_name: string
+          created_at: string | null
+          handover_id: string | null
+          id: string
+          meta: Json
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_name?: string
+          created_at?: string | null
+          handover_id?: string | null
+          id?: string
+          meta?: Json
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_name?: string
+          created_at?: string | null
+          handover_id?: string | null
+          id?: string
+          meta?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_handover_id_fkey"
+            columns: ["handover_id"]
+            isOneToOne: false
+            referencedRelation: "handovers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       handovers: {
         Row: {
           cash_drawer: number
           cash_recount: number | null
           cash_variance: number | null
           created_at: string | null
+          drive_error: string | null
+          drive_file_id: string | null
+          drive_uploaded_at: string | null
           id: string
           incoming_name: string | null
           incoming_signature_url: string | null
@@ -46,6 +87,9 @@ export type Database = {
           cash_recount?: number | null
           cash_variance?: number | null
           created_at?: string | null
+          drive_error?: string | null
+          drive_file_id?: string | null
+          drive_uploaded_at?: string | null
           id?: string
           incoming_name?: string | null
           incoming_signature_url?: string | null
@@ -71,6 +115,9 @@ export type Database = {
           cash_recount?: number | null
           cash_variance?: number | null
           created_at?: string | null
+          drive_error?: string | null
+          drive_file_id?: string | null
+          drive_uploaded_at?: string | null
           id?: string
           incoming_name?: string | null
           incoming_signature_url?: string | null

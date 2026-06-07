@@ -1,5 +1,59 @@
+import { Readable } from "node:stream";
 import { google } from "googleapis";
 import { createServiceClient } from "@/lib/supabase/server";
+import { renderHandoverPdfBuffer } from "@/lib/pdf/render";
+import { logAudit } from "@/lib/audit";
+import type { HandoverPdfData } from "@/lib/pdf/HandoverPdf";
+
+const DRIVE_FOLDERS: Record<string, string | undefined> = {
+  al_aqeeq: process.env.DRIVE_FOLDER_AL_AQEEQ,
+  as_salaam: process.env.DRIVE_FOLDER_AS_SALAAM,
+};
+
+// Render the branded PDF and upload it to the hotel's Drive folder. Idempotent
+// (skips if drive_file_id present). Never blocks; records drive_error on failure.
+async function archiveToDrive(
+  supabase: ReturnType<typeof createServiceClient>,
+  h: Record<string, unknown> & { id: string; drive_file_id: string | null },
+  saEmail: string,
+  saKey: string,
+): Promise<void> {
+  if (h.drive_file_id) return;
+  const prop = h.properties as { code?: string; name_en?: string } | null;
+  const folderId = prop?.code ? DRIVE_FOLDERS[prop.code] : undefined;
+  if (!folderId) {
+    await supabase.from("handovers").update({ drive_error: "no drive folder for property" }).eq("id", h.id);
+    return;
+  }
+  try {
+    const lang = "en" as const;
+    const pdf = await renderHandoverPdfBuffer(
+      { ...(h as unknown as HandoverPdfData), propertyName: prop?.name_en ?? "" },
+      lang,
+    );
+    const auth = new google.auth.JWT({
+      email: saEmail,
+      key: saKey,
+      scopes: ["https://www.googleapis.com/auth/drive"],
+    });
+    const drive = google.drive({ version: "v3", auth });
+    const name = `Aurion ${prop?.name_en ?? "Handover"} ${h.shift_date} ${h.id.slice(0, 8)}.pdf`;
+    const res = await drive.files.create({
+      requestBody: { name, parents: [folderId] },
+      media: { mimeType: "application/pdf", body: Readable.from(pdf) },
+      fields: "id",
+      supportsAllDrives: true,
+    });
+    await supabase
+      .from("handovers")
+      .update({ drive_file_id: res.data.id, drive_uploaded_at: new Date().toISOString(), drive_error: null })
+      .eq("id", h.id);
+    await logAudit({ action: "drive_uploaded", handoverId: h.id, meta: { fileId: res.data.id } });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "drive upload failed";
+    await supabase.from("handovers").update({ drive_error: msg }).eq("id", h.id);
+  }
+}
 
 // Append a completed handover as ONE row to Google Sheets.
 // - Server-only: the Google key never reaches the browser.
@@ -18,21 +72,27 @@ export async function POST(req: Request) {
 
   const { data: h, error } = await supabase
     .from("handovers")
-    .select("*, properties(code, name_en)")
+    .select("*, properties(code, name_en, name_ar)")
     .eq("id", id)
     .maybeSingle();
 
   if (error || !h) {
     return Response.json({ ok: false, error: "not found" }, { status: 404 });
   }
-  // Idempotent: already synced → no double-append.
-  if (h.synced_to_sheets) {
-    return Response.json({ ok: true, alreadySynced: true });
-  }
 
   const sheetId = process.env.HANDOVER_SHEET_ID;
   const saEmail = process.env.GOOGLE_SA_EMAIL;
   const saKey = process.env.GOOGLE_SA_PRIVATE_KEY?.replace(/\\n/g, "\n");
+
+  // Archive the PDF to the hotel's Drive folder (idempotent, independent of Sheets).
+  if (saEmail && saKey) {
+    await archiveToDrive(supabase, h as never, saEmail, saKey);
+  }
+
+  // Idempotent: already sheet-synced → no double-append (Drive handled above).
+  if (h.synced_to_sheets) {
+    return Response.json({ ok: true, alreadySynced: true });
+  }
 
   if (!sheetId || !saEmail || !saKey) {
     await supabase
@@ -88,6 +148,17 @@ export async function POST(req: Request) {
         sheet_sync_error: null,
       })
       .eq("id", id);
+
+    await logAudit({
+      action: "handover_completed",
+      handoverId: id,
+      meta: {
+        property: propertyName,
+        variance: h.cash_variance,
+        incoming: h.incoming_name,
+      },
+    });
+    await logAudit({ action: "sheet_synced", handoverId: id });
 
     return Response.json({ ok: true });
   } catch (err) {
