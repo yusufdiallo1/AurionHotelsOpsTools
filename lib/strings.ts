@@ -56,8 +56,12 @@ export const strings = {
   // Properties (CLAUDE.md §7) — keys map to the `properties` table slugs.
   propAlAqeeq: { en: "Al-Aqeeq", ar: "العقيق" },
   propAsSalaam: { en: "As-Salaam", ar: "السلام" },
-  propQuba: { en: "Quba", ar: "قُبا" },
   propertyLabel: { en: "Property", ar: "الفندق" },
+
+  // Occupancy
+  occupancyLabel: { en: "Occupancy", ar: "نسبة الإشغال" },
+  ofRooms: { en: "of", ar: "من" },
+  roomsTotal: { en: "rooms", ar: "غرفة" },
 
   // Shifts
   shiftNight: { en: "Night", ar: "ليلية" },

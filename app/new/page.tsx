@@ -17,7 +17,7 @@ import { useLang } from "@/lib/i18n";
 import { useOnline } from "@/lib/useOnline";
 import { createClient } from "@/lib/supabase/client";
 import { withRetry } from "@/lib/retry";
-import { PROPERTIES, type PropertySlug } from "@/lib/properties";
+import { PROPERTIES, totalRoomsFor, type PropertySlug } from "@/lib/properties";
 import {
   MAX_NAME,
   MAX_TEXTAREA,
@@ -26,6 +26,7 @@ import {
   todayIso,
   type ShiftType,
 } from "@/lib/handover";
+import { displayDigits } from "@/lib/digits";
 
 const DRAFT_KEY = "aurion-handover-draft-v1";
 
@@ -72,6 +73,11 @@ export default function NewHandoverPage() {
 
   const roomsNum = parseAmount(d.rooms);
   const cashNum = parseAmount(d.cash);
+  const totalRooms = totalRoomsFor(d.property);
+  const occupancyPct =
+    roomsNum !== null && totalRooms > 0
+      ? Math.round((Math.min(roomsNum, totalRooms) / totalRooms) * 100)
+      : null;
   const valid =
     !!d.property &&
     !!d.shift &&
@@ -79,6 +85,7 @@ export default function NewHandoverPage() {
     roomsNum !== null &&
     Number.isInteger(roomsNum) &&
     roomsNum >= 0 &&
+    roomsNum <= totalRooms &&
     cashNum !== null &&
     cashNum >= 0;
 
@@ -259,12 +266,34 @@ export default function NewHandoverPage() {
           maxLength={MAX_NAME}
         />
 
-        <NumberField
-          labelKey="fieldRooms"
-          value={d.rooms}
-          onChange={(v) => set("rooms", v)}
-          mode="integer"
-        />
+        <div className="flex flex-col gap-2">
+          <NumberField
+            labelKey="fieldRooms"
+            value={d.rooms}
+            onChange={(v) => set("rooms", v)}
+            mode="integer"
+          />
+          {/* Live occupancy: rooms occupied / total, with a rate bar. */}
+          {d.property ? (
+            <div className="glass-cream flex flex-col gap-2 rounded-aurion px-4 py-3">
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-ink-soft">
+                  {displayDigits(Math.min(roomsNum ?? 0, totalRooms), lang)} {t("ofRooms")}{" "}
+                  {displayDigits(totalRooms, lang)} {t("roomsTotal")}
+                </span>
+                <span className="font-bold text-gold-deep">
+                  {t("occupancyLabel")}: {displayDigits(occupancyPct ?? 0, lang)}%
+                </span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-line">
+                <div
+                  className="h-full rounded-full bg-gold transition-all"
+                  style={{ width: `${occupancyPct ?? 0}%` }}
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
 
         <NumberField
           labelKey="fieldCashDrawer"

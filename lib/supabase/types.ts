@@ -111,6 +111,7 @@ export type Database = {
           id: string
           name_ar: string
           name_en: string
+          total_rooms: number
         }
         Insert: {
           code: string
@@ -118,6 +119,7 @@ export type Database = {
           id?: string
           name_ar: string
           name_en: string
+          total_rooms?: number
         }
         Update: {
           code?: string
@@ -125,6 +127,7 @@ export type Database = {
           id?: string
           name_ar?: string
           name_en?: string
+          total_rooms?: number
         }
         Relationships: []
       }

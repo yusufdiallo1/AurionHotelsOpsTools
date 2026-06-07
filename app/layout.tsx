@@ -5,7 +5,7 @@ import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n";
 import { DEFAULT_LANG, LANG_COOKIE, isLang, dirFor } from "@/lib/i18n/config";
 import { SyncSweeper } from "@/components/SyncSweeper";
-import { BottomNav } from "@/components/layout";
+import { AppNav } from "@/components/layout";
 
 // Brand display — the AURION wordmark / headings. (CLAUDE.md §5)
 const cinzel = Cinzel({
@@ -61,11 +61,12 @@ export default async function RootLayout({
         "h-full antialiased",
       ].join(" ")}
     >
-      <body className="min-h-full bg-cream text-ink pb-nav">
+      {/* pb-nav clears the bottom bar on mobile; md:pt-20 clears the top pill on desktop. */}
+      <body className="min-h-full bg-cream text-ink pb-nav md:pb-0 md:pt-20">
         <LanguageProvider initialLang={lang}>
           <SyncSweeper />
           {children}
-          <BottomNav />
+          <AppNav />
         </LanguageProvider>
       </body>
     </html>

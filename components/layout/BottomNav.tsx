@@ -17,9 +17,7 @@ const ITEMS: NavItem[] = [
     href: "/",
     labelKey: "navHome",
     match: (p) => p === "/",
-    icon: (
-      <path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5" />
-    ),
+    icon: <path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5" />,
   },
   {
     href: "/new",
@@ -41,35 +39,61 @@ const ITEMS: NavItem[] = [
   },
 ];
 
-// Fixed frosted-glass bottom navigation. Bilingual + RTL-aware, highlights the
-// active route. (Glassmorphism — see globals.css .glass-navy)
-export function BottomNav() {
-  const { t } = useLang();
+// Responsive liquid-glass navigation:
+//  - mobile: fixed bottom bar
+//  - desktop (md+): fixed top, centered glass pill
+// A solid glass "slider" animates to the active tab. Bilingual + RTL-aware.
+export function AppNav() {
+  const { t, dir } = useLang();
   const pathname = usePathname();
 
-  // Hide on the styleguide (visual test surface).
   if (pathname.startsWith("/styleguide")) return null;
+
+  const activeIndex = Math.max(
+    0,
+    ITEMS.findIndex((it) => it.match(pathname)),
+  );
+  const count = ITEMS.length;
+  // Slider offset: in RTL the first item sits on the right, so move the slider
+  // the other way.
+  const pct = activeIndex * 100;
+  const sliderTransform =
+    dir === "rtl" ? `translateX(${-pct}%)` : `translateX(${pct}%)`;
 
   return (
     <nav
       aria-label="Primary"
-      className="glass-navy fixed inset-x-0 bottom-0 z-40 text-cream shadow-[0_-8px_30px_rgba(19,30,51,0.25)]"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      className={[
+        "fixed inset-x-0 z-40 flex justify-center px-3",
+        "bottom-0 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2", // mobile: bottom
+        "md:bottom-auto md:top-3 md:pb-0 md:pt-0", // desktop: top
+      ].join(" ")}
     >
-      <ul className="mx-auto flex w-full max-w-[480px] items-stretch justify-around px-2">
-        {ITEMS.map((item) => {
-          const active = item.match(pathname);
-          return (
-            <li key={item.href} className="flex-1">
-              <Link
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className="flex min-h-[60px] flex-col items-center justify-center gap-1 py-2"
-              >
-                <span
+      <div className="glass-navy relative w-full max-w-[480px] rounded-[22px] p-1.5 shadow-[0_8px_30px_rgba(19,30,51,0.35)] md:w-auto">
+        {/* Animated solid glass slider behind the active item */}
+        <div
+          className="pointer-events-none absolute inset-y-1.5 start-1.5 rounded-[16px] bg-gold shadow-md transition-transform duration-300 ease-out"
+          style={{
+            width: `calc((100% - 0.75rem) / ${count})`,
+            transform: sliderTransform,
+          }}
+          aria-hidden
+        />
+
+        <ul
+          className="relative grid"
+          style={{ gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))` }}
+        >
+          {ITEMS.map((item, i) => {
+            const active = i === activeIndex;
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
                   className={[
-                    "flex h-9 w-9 items-center justify-center rounded-full transition-colors",
-                    active ? "bg-gold text-navy-deep" : "text-cream/70",
+                    "flex min-h-[48px] flex-col items-center justify-center gap-0.5 rounded-[16px] px-3 py-1.5 transition-colors md:min-h-[44px] md:flex-row md:gap-2",
+                    active ? "text-navy-deep" : "text-cream/75 hover:text-cream",
                   ].join(" ")}
                 >
                   <svg
@@ -83,20 +107,18 @@ export function BottomNav() {
                   >
                     {item.icon}
                   </svg>
-                </span>
-                <span
-                  className={[
-                    "text-[11px] font-bold leading-none",
-                    active ? "text-cream" : "text-cream/70",
-                  ].join(" ")}
-                >
-                  {t(item.labelKey)}
-                </span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+                  <span className="text-[11px] font-bold leading-none md:text-[14px]">
+                    {t(item.labelKey)}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </nav>
   );
 }
+
+// Back-compat alias (was BottomNav).
+export const BottomNav = AppNav;
