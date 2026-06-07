@@ -92,10 +92,13 @@ export async function notifyIncoming(handoverId: string): Promise<void> {
   if (recipients.length === 0) recipients = all.filter(notOutgoing);
   if (recipients.length === 0) return;
 
-  const hotel =
-    (h.properties as { name_en?: string } | null)?.name_en ?? "the hotel";
-  const title = "Incoming handover";
-  const bodyText = `A shift handover at ${hotel} is waiting for you.`;
+  const props = h.properties as { name_en?: string; name_ar?: string } | null;
+  const hotelAr = props?.name_ar ?? props?.name_en ?? "الفندق";
+  const hotelEn = props?.name_en ?? "the hotel";
+  // Bilingual (Arabic-first, default language) — the server can't know each
+  // recipient's UI language, so include both.
+  const title = "تسليم وارد · Incoming handover";
+  const bodyText = `تسليم وردية في ${hotelAr} بانتظارك · A shift handover at ${hotelEn} is waiting for you.`;
   const url = `/new/${h.id}`;
 
   // In-app notifications (realtime) for every recipient.

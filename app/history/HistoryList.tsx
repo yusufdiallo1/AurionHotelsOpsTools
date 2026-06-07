@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { DateField, LiveIndicator, SegmentedSelect, SyncBadge } from "@/components/ui";
+import { DateField, SegmentedSelect, SyncBadge } from "@/components/ui";
 import { FieldLabel } from "@/components/ui/FieldLabel";
 import { useLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
@@ -79,6 +79,7 @@ export function HistoryList() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false); // collapsed → list shows first
   // Aggregates over ALL matching rows (not just the loaded page).
   const [totals, setTotals] = useState<{ count: number; cash: number }>({ count: 0, cash: 0 });
   // property_id -> meta, loaded once (only 3 properties). Lets the live path
@@ -169,7 +170,8 @@ export function HistoryList() {
   );
 
   // Realtime: upsert by id, honouring active filters; reconcile on reconnect.
-  const status = useHandoverRealtime(
+  // Realtime keeps the list fresh; we no longer surface a live/reconnecting badge.
+  useHandoverRealtime(
     {
       onUpsert: (incoming) => {
         const meta = propMap[incoming.property_id];
@@ -242,14 +244,31 @@ export function HistoryList() {
 
   return (
     <main className="mx-auto flex w-full max-w-[480px] flex-col gap-5 px-5 py-6">
-      <div className="flex justify-end">
-        <LiveIndicator status={status} />
-      </div>
 
-      {/* Filters */}
+      {/* Filters — collapsed by default so the history list is the first thing shown */}
       <section className="flex flex-col gap-4 glass rounded-aurion p-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-[15px] font-bold text-ink">{t("filters")}</h2>
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((o) => !o)}
+            aria-expanded={filtersOpen}
+            className="flex items-center gap-2 text-[15px] font-bold text-ink"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4 text-gold-deep">
+              <path d="M3 5h18M6 12h12M10 19h4" strokeLinecap="round" />
+            </svg>
+            {t("filters")}
+            {filtersActive ? <span className="h-2 w-2 rounded-full bg-gold-deep" aria-hidden /> : null}
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              className={`h-4 w-4 text-ink-soft transition-transform ${filtersOpen ? "rotate-180" : ""}`}
+            >
+              <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
           {filtersActive ? (
             <button
               type="button"
@@ -261,6 +280,8 @@ export function HistoryList() {
           ) : null}
         </div>
 
+        {filtersOpen ? (
+        <>
         {/* Reception name search */}
         <div>
           <FieldLabel k="filterName" />
@@ -391,6 +412,8 @@ export function HistoryList() {
           />
           <span className="text-[15px] text-ink">{t("filterMismatchOnly")}</span>
         </label>
+        </>
+        ) : null}
       </section>
 
       {/* Results summary — aggregates over ALL matching handovers */}

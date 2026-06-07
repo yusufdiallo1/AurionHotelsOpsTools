@@ -131,7 +131,7 @@ export function DateField({
             <div className="flex gap-1">
               <button
                 type="button"
-                aria-label="Previous month"
+                aria-label={lang === "ar" ? "الشهر السابق" : "Previous month"}
                 onClick={() => setView(new Date(year, month - 1, 1))}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-ink-soft hover:bg-line/60"
               >
@@ -139,7 +139,7 @@ export function DateField({
               </button>
               <button
                 type="button"
-                aria-label="Next month"
+                aria-label={lang === "ar" ? "الشهر التالي" : "Next month"}
                 onClick={() => setView(new Date(year, month + 1, 1))}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-ink-soft hover:bg-line/60"
               >

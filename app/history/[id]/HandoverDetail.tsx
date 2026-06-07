@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLang } from "@/lib/i18n";
-import { LiveIndicator, SyncBadge } from "@/components/ui";
+import { SyncBadge } from "@/components/ui";
 import { useHandoverRealtime } from "@/lib/useHandoverRealtime";
 import {
   SHIFT_OPTIONS,
@@ -49,7 +49,7 @@ export function HandoverDetail({ handover, propertyNameEn, propertyNameAr }: Pro
 
   // Reflect live updates to THIS handover (e.g. incoming completes it on another
   // device, or a re-sync flips the badge elsewhere). (CLAUDE.md realtime)
-  const liveStatus = useHandoverRealtime(
+  useHandoverRealtime(
     {
       onUpsert: (incoming) => {
         if (incoming.id === handover.id) setRow(incoming);
@@ -135,10 +135,6 @@ export function HandoverDetail({ handover, propertyNameEn, propertyNameAr }: Pro
 
   return (
     <main className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-5 py-6">
-      <div className="flex justify-end">
-        <LiveIndicator status={liveStatus} />
-      </div>
-
       <Card title={t("outgoingSummary")}>
         <Row label={t("propertyLabel")} value={propName} />
         <Row label={t("fieldDate")} value={formatDate(row.shift_date, lang)} />

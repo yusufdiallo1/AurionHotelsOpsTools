@@ -37,7 +37,7 @@ export const strings = {
   receptionNameLabel: { en: "Reception name", ar: "اسم موظف الاستقبال" },
   shiftTimeLabel: { en: "Shift", ar: "الوردية" },
   usernameLabel: { en: "Username", ar: "اسم المستخدم" },
-  usernamePlaceholder: { en: "e.g. bassam", ar: "مثال: bassam" },
+  usernamePlaceholder: { en: "e.g. abdullah", ar: "مثال: abdullah" },
   workDaysLabel: { en: "Working days", ar: "أيام العمل" },
   dowSun: { en: "Sun", ar: "أحد" },
   dowMon: { en: "Mon", ar: "إثن" },

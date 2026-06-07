@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { signOut } from "@/lib/sign-out";
 import { DateField } from "@/components/ui";
 import { ActivityLog } from "./ActivityLog";
-import { useHandoverRealtime, type RealtimeStatus } from "@/lib/useHandoverRealtime";
+import { useHandoverRealtime } from "@/lib/useHandoverRealtime";
 import { useIdleLock } from "@/lib/useIdleLock";
 import { PROPERTIES, type PropertySlug } from "@/lib/properties";
 import { todayIso } from "@/lib/handover";
@@ -115,7 +115,8 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
   }, [scope, selectedDate, property, load]);
 
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const status: RealtimeStatus = useHandoverRealtime(
+  // Realtime keeps KPIs fresh; no live/reconnecting badge is shown.
+  useHandoverRealtime(
     {
       onUpsert: () => {
         if (debounce.current) clearTimeout(debounce.current);
@@ -177,14 +178,7 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
       className={`mx-auto flex w-full max-w-[680px] flex-col gap-4 px-4 py-5 ${lang === "ar" ? "font-ar" : ""}`}
     >
       {/* Top bar */}
-      <div className="flex items-center justify-between gap-3">
-        <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-ink-soft">
-          <span
-            className={`h-2 w-2 rounded-full ${status === "live" ? "bg-green-500" : "animate-pulse bg-amber-500"}`}
-            aria-hidden
-          />
-          {status === "live" ? t("live") : t("reconnecting")}
-        </span>
+      <div className="flex items-center justify-end gap-3">
         <div className="flex items-center gap-2">
           <LangPicker lang={lang} onChange={setLang} />
           <Link
