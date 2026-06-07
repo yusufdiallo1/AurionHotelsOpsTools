@@ -60,6 +60,12 @@ export const strings = {
 
   // Occupancy
   occupancyLabel: { en: "Occupancy", ar: "نسبة الإشغال" },
+  occupancyMax: { en: "Maximum is 19 rooms", ar: "الحد الأقصى 19 غرفة" },
+  confirmEmptyExtrasTitle: { en: "Nothing to hand over?", ar: "لا شيء للتسليم؟" },
+  confirmEmptyExtrasBody: {
+    en: "No pending requests or maintenance issues entered. Continue anyway?",
+    ar: "لم تُدخل أي طلبات معلّقة أو أعطال صيانة. المتابعة على أي حال؟",
+  },
   ofRooms: { en: "of", ar: "من" },
   roomsTotal: { en: "rooms", ar: "غرفة" },
 

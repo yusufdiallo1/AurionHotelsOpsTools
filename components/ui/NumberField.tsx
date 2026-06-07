@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { useLang } from "@/lib/i18n";
 import type { StringKey } from "@/lib/strings";
-import { displayDigits, normalizeNumericInput } from "@/lib/digits";
+import { normalizeNumericInput } from "@/lib/digits";
 import { sanitizeIntInput, sanitizeMoneyInput } from "@/lib/handover";
 import { FieldLabel } from "./FieldLabel";
 
@@ -27,11 +27,11 @@ export function NumberField({
   mode?: "money" | "integer";
   suffix?: string;
 }) {
-  const { t, lang } = useLang();
+  const { t } = useLang();
   const id = useId();
 
-  // Use a text input (not type=number) so we control digit display + RTL.
-  const shown = lang === "ar" ? displayDigits(value, "ar") : value;
+  // Numerals are always Latin/Western (client requirement); input stays LTR.
+  const shown = value;
 
   function handleChange(raw: string) {
     // 1) Arabic-Indic → Western, 2) strip to the allowed shape (no negatives).

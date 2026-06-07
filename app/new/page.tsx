@@ -69,6 +69,7 @@ export default function NewHandoverPage() {
   // Draft restore prompt + duplicate prompt + leave guard.
   const [restorable, setRestorable] = useState<Draft | null>(null);
   const [dup, setDup] = useState<{ id: string } | null>(null);
+  const [confirmEmpty, setConfirmEmpty] = useState(false);
   const dirtyRef = useRef(false);
 
   const roomsNum = parseAmount(d.rooms);
@@ -78,6 +79,7 @@ export default function NewHandoverPage() {
     roomsNum !== null && totalRooms > 0
       ? Math.round((Math.min(roomsNum, totalRooms) / totalRooms) * 100)
       : null;
+  const overMax = roomsNum !== null && roomsNum > totalRooms;
   const valid =
     !!d.property &&
     !!d.shift &&
@@ -167,8 +169,19 @@ export default function NewHandoverPage() {
     return data && data.length ? data[0].id : null;
   }
 
+  // Done button: if no pending requests AND no maintenance issues, confirm first.
+  function handleDone() {
+    if (!valid || submitting || !online) return;
+    if (!d.pending.trim() && !d.maintenance.trim()) {
+      setConfirmEmpty(true);
+      return;
+    }
+    attemptSubmit();
+  }
+
   async function attemptSubmit() {
     if (!valid || submitting || !online) return;
+    setConfirmEmpty(false);
     const existing = await findDuplicate();
     if (existing) {
       setDup({ id: existing });
@@ -273,8 +286,17 @@ export default function NewHandoverPage() {
             onChange={(v) => set("rooms", v)}
             mode="integer"
           />
+          {/* MAX-19 banner when over capacity */}
+          {overMax ? (
+            <p
+              role="alert"
+              className="rounded-aurion border-2 border-red-600 bg-red-50 px-4 py-2 text-[14px] font-bold text-red-800"
+            >
+              {t("occupancyMax")}
+            </p>
+          ) : null}
           {/* Live occupancy: rooms occupied / total, with a rate bar. */}
-          {d.property ? (
+          {d.property && !overMax ? (
             <div className="glass-cream flex flex-col gap-2 rounded-aurion px-4 py-3">
               <div className="flex items-center justify-between text-[13px]">
                 <span className="text-ink-soft">
@@ -333,10 +355,20 @@ export default function NewHandoverPage() {
 
         <PrimaryButton
           labelKey={submitting ? "saving" : !online ? "offlineSubmit" : "step1Submit"}
-          onClick={attemptSubmit}
+          onClick={handleDone}
           disabled={!valid || submitting || !online}
         />
       </main>
+
+      {/* Empty pending+maintenance confirm */}
+      <ConfirmDialog
+        open={confirmEmpty}
+        titleKey="confirmEmptyExtrasTitle"
+        bodyKey="confirmEmptyExtrasBody"
+        confirmKey="continue"
+        onConfirm={attemptSubmit}
+        onCancel={() => setConfirmEmpty(false)}
+      />
 
       {/* Restore-draft prompt */}
       <ConfirmDialog

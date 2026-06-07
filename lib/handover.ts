@@ -2,7 +2,6 @@
 
 import type { StringKey } from "@/lib/strings";
 import type { Lang } from "@/lib/i18n/config";
-import { displayDigits } from "@/lib/digits";
 import type { Database } from "@/lib/supabase/types";
 
 export type Handover = Database["public"]["Tables"]["handovers"]["Row"];
@@ -35,7 +34,7 @@ export function isoDaysBeforeToday(days: number): string {
  * Format an amount as SAR with thousands separators, localising digits in AR.
  * `value` is a Western-form number or numeric string (source of truth).
  */
-export function formatSAR(value: number | string | null | undefined, lang: Lang): string {
+export function formatSAR(value: number | string | null | undefined, _lang?: Lang): string {
   if (value === null || value === undefined || value === "") return "—";
   const n = typeof value === "string" ? Number(value) : value;
   if (Number.isNaN(n)) return "—";
@@ -43,14 +42,21 @@ export function formatSAR(value: number | string | null | undefined, lang: Lang)
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-  const localized = displayDigits(grouped, lang);
-  return lang === "ar" ? `${localized} ر.س` : `SAR ${localized}`;
+  // Client requirement: SAR symbol on the LEFT, Latin digits, in every language.
+  // Wrapped in a Unicode LTR isolate so it reads left-to-right inside RTL text.
+  return ltr(`SAR ${grouped}`);
 }
 
-/** Format a YYYY-MM-DD date for display, localising digits in AR. */
-export function formatDate(iso: string | null | undefined, lang: Lang): string {
+/** Wrap a value in a Unicode LTR isolate (U+2066 … U+2069) so numbers/dates
+ *  render left-to-right even within Arabic (RTL) surrounding text. */
+export function ltr(value: string): string {
+  return `⁦${value}⁩`;
+}
+
+/** Format a YYYY-MM-DD date for display — Latin digits, LTR-isolated. */
+export function formatDate(iso: string | null | undefined, _lang?: Lang): string {
   if (!iso) return "—";
-  return displayDigits(iso, lang);
+  return ltr(iso);
 }
 
 /** Parse a Western-digit numeric string to a number, or null if blank/invalid. */

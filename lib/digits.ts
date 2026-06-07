@@ -36,12 +36,13 @@ export function toArabicIndicDigits(input: string): string {
 }
 
 /**
- * Format a number/string for display in the active language: Arabic-Indic in AR,
- * Western in EN. Input is assumed to already be in Western form (source of truth).
+ * Display numerals. Per client requirement (2026-06-07), ALL languages — including
+ * Arabic and Swedish — show Latin/Western numerals (never Arabic-Indic). Numbers
+ * and dates read left-to-right even inside RTL text. `lang` is kept for signature
+ * stability but no longer changes the output.
  */
-export function displayDigits(value: string | number, lang: Lang): string {
-  const s = String(value);
-  return lang === "ar" ? toArabicIndicDigits(s) : s;
+export function displayDigits(value: string | number, _lang?: Lang): string {
+  return String(value);
 }
 
 /**

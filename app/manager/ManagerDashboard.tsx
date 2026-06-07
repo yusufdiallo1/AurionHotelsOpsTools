@@ -18,7 +18,6 @@ import {
   weekStats,
   type ManagerRow,
 } from "@/lib/manager";
-import { toArabicIndicDigits } from "@/lib/digits";
 import {
   MANAGER_LANGS,
   managerDir,
@@ -31,17 +30,17 @@ const PAGE = 25;
 
 type Scope = "day" | "week" | "month" | "all";
 
-function dg(value: string | number, lang: ManagerLang): string {
-  const s = String(value);
-  return lang === "ar" ? toArabicIndicDigits(s) : s;
+// Latin numerals + SAR-on-left in every language (client requirement).
+function dg(value: string | number): string {
+  return String(value);
 }
-function sar(value: number | null | undefined, lang: ManagerLang): string {
+function sar(value: number | null | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "—";
   const grouped = value.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-  return lang === "ar" ? `${toArabicIndicDigits(grouped)} ر.س` : `SAR ${grouped}`;
+  return `SAR ${grouped}`;
 }
 
 const SHIFT_KEY: Record<string, ManagerKey> = {
@@ -204,11 +203,11 @@ export function ManagerDashboard() {
           {t("overview")} · {t("acrossProperties")}
         </p>
         <div className="mt-4 grid grid-cols-2 gap-4">
-          <Hero label={t("cashInDrawer")} value={sar(totals.cashInDrawer, lang)} />
+          <Hero label={t("cashInDrawer")} value={sar(totals.cashInDrawer)} />
           <Hero
             label={t("occupancy")}
-            value={`${dg(totals.occupancyPct, lang)}%`}
-            sub={`${dg(totals.roomsOccupied, lang)} / ${dg(totals.totalRooms, lang)} ${t("rooms")}`}
+            value={`${dg(totals.occupancyPct)}%`}
+            sub={`${dg(totals.roomsOccupied)} / ${dg(totals.totalRooms)} ${t("rooms")}`}
           />
         </div>
         {/* portfolio occupancy bar */}
@@ -227,7 +226,7 @@ export function ManagerDashboard() {
             <div className="flex items-center justify-between">
               <h3 className="text-[15px] font-bold text-ink">{mt(propKey(s.slug), lang)}</h3>
               <span className="text-[13px] font-bold text-gold-deep">
-                {s.occupancyPct === null ? "—" : `${dg(s.occupancyPct, lang)}%`}
+                {s.occupancyPct === null ? "—" : `${dg(s.occupancyPct)}%`}
               </span>
             </div>
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-line">
@@ -239,20 +238,20 @@ export function ManagerDashboard() {
             <dl className="mt-3 flex items-end justify-between">
               <div>
                 <dt className="text-[11px] text-ink-soft">{t("cashInDrawer")}</dt>
-                <dd className="text-[15px] font-bold text-ink">{sar(s.cashInDrawer, lang)}</dd>
+                <dd className="text-[15px] font-bold text-ink">{sar(s.cashInDrawer)}</dd>
               </div>
               <div className="text-end">
                 <dt className="text-[11px] text-ink-soft">{t("roomsOccupied")}</dt>
                 <dd className="text-[15px] font-bold text-ink">
                   {s.roomsOccupied === null
                     ? "—"
-                    : `${dg(s.roomsOccupied, lang)} / ${dg(s.totalRooms, lang)}`}
+                    : `${dg(s.roomsOccupied)} / ${dg(s.totalRooms)}`}
                 </dd>
               </div>
             </dl>
             {s.latest ? (
               <p className="mt-2 text-[11px] text-muted">
-                {t("lastUpdated")}: {dg(s.latest.shift_date, lang)}
+                {t("lastUpdated")}: {dg(s.latest.shift_date)}
               </p>
             ) : (
               <p className="mt-2 text-[11px] text-muted">{t("noData")}</p>
@@ -304,15 +303,15 @@ export function ManagerDashboard() {
       {/* Period stats */}
       <Card title={`${t("stats")} · ${scopeLabel}`}>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat label={t("statHandovers")} value={dg(stats.count, lang)} />
-          <Stat label={t("statMismatches")} value={dg(stats.mismatches, lang)} flag={stats.mismatches > 0} />
-          <Stat label={t("statTotalVariance")} value={sar(stats.totalVariance, lang)} flag={Math.abs(stats.totalVariance) > 0.005} />
-          <Stat label={t("statAvgVariance")} value={sar(stats.avgVariance, lang)} />
+          <Stat label={t("statHandovers")} value={dg(stats.count)} />
+          <Stat label={t("statMismatches")} value={dg(stats.mismatches)} flag={stats.mismatches > 0} />
+          <Stat label={t("statTotalVariance")} value={sar(stats.totalVariance)} flag={Math.abs(stats.totalVariance) > 0.005} />
+          <Stat label={t("statAvgVariance")} value={sar(stats.avgVariance)} />
         </div>
       </Card>
 
       {/* Missing shifts */}
-      <Card title={`${t("missingShifts")} · ${dg(selectedDate, lang)}`}>
+      <Card title={`${t("missingShifts")} · ${dg(selectedDate)}`}>
         {missing.length === 0 ? (
           <p className="text-[14px] text-ink-soft">{t("missingNone")}</p>
         ) : (
@@ -345,7 +344,7 @@ export function ManagerDashboard() {
                     {propName(f, lang)} · {t(SHIFT_KEY[f.shift_type] ?? "shiftNight")} · {f.outgoing_name}
                     {f.incoming_name ? ` → ${f.incoming_name}` : ""}
                   </span>
-                  <span className="font-bold text-red-700">{sar(f.cash_variance, lang)}</span>
+                  <span className="font-bold text-red-700">{sar(f.cash_variance)}</span>
                 </Link>
               </li>
             ))}
@@ -370,7 +369,7 @@ export function ManagerDashboard() {
                       <span className="text-[14px] font-medium text-ink">
                         {propName(r, lang)} · {t(SHIFT_KEY[r.shift_type] ?? "shiftNight")}
                       </span>
-                      <span className="text-[12px] text-ink-soft">{dg(r.shift_date, lang)}</span>
+                      <span className="text-[12px] text-ink-soft">{dg(r.shift_date)}</span>
                     </span>
                     <span className="text-[13px] font-bold text-gold-deep">{t("view")}</span>
                   </Link>
