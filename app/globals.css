@@ -120,12 +120,13 @@ select {
   border: 1px solid color-mix(in srgb, var(--color-line) 70%, transparent);
 }
 
-/* Dark/navy frosted glass — for the bottom nav + header overlays. */
+/* Dark/navy frosted glass — for the bottom nav + header overlays. More translucent
+   with a heavier blur so the page reads through it as real frosted glass. */
 .glass-navy {
-  background: color-mix(in srgb, var(--color-navy) 70%, transparent);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border: 1px solid color-mix(in srgb, var(--color-gold) 22%, transparent);
+  background: color-mix(in srgb, var(--color-navy) 48%, transparent);
+  backdrop-filter: blur(24px) saturate(170%);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  border: 1px solid color-mix(in srgb, var(--color-gold) 26%, transparent);
 }
 
 /* Cream frosted glass — for page-level floating cards over the cream bg. */
