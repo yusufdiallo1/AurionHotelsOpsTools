@@ -1,57 +1,40 @@
-import { Readable } from "node:stream";
 import { google } from "googleapis";
 import { createServiceClient } from "@/lib/supabase/server";
 import { renderHandoverPdfBuffer } from "@/lib/pdf/render";
 import { logAudit } from "@/lib/audit";
 import type { HandoverPdfData } from "@/lib/pdf/HandoverPdf";
 
-const DRIVE_FOLDERS: Record<string, string | undefined> = {
-  al_aqeeq: process.env.DRIVE_FOLDER_AL_AQEEQ,
-  as_salaam: process.env.DRIVE_FOLDER_AS_SALAAM,
-};
+const ARCHIVE_BUCKET = "handover-pdfs";
 
-// Render the branded PDF and upload it to the hotel's Drive folder. Idempotent
-// (skips if drive_file_id present). Never blocks; records drive_error on failure.
-async function archiveToDrive(
+// Render the branded PDF and archive it to Supabase Storage, organised per hotel
+// (handover-pdfs/<code>/<date>-<id8>.pdf). Idempotent (skips if pdf_path present).
+// Never blocks; records pdf_archive_error on failure. (Free alternative to Drive,
+// which requires a paid Workspace Shared Drive for service-account uploads.)
+async function archiveToStorage(
   supabase: ReturnType<typeof createServiceClient>,
-  h: Record<string, unknown> & { id: string; drive_file_id: string | null },
-  saEmail: string,
-  saKey: string,
+  h: Record<string, unknown> & { id: string; pdf_path: string | null; shift_date: string },
 ): Promise<void> {
-  if (h.drive_file_id) return;
+  if (h.pdf_path) return;
   const prop = h.properties as { code?: string; name_en?: string } | null;
-  const folderId = prop?.code ? DRIVE_FOLDERS[prop.code] : undefined;
-  if (!folderId) {
-    await supabase.from("handovers").update({ drive_error: "no drive folder for property" }).eq("id", h.id);
-    return;
-  }
+  const code = prop?.code ?? "unknown";
   try {
-    const lang = "en" as const;
     const pdf = await renderHandoverPdfBuffer(
       { ...(h as unknown as HandoverPdfData), propertyName: prop?.name_en ?? "" },
-      lang,
+      "en",
     );
-    const auth = new google.auth.JWT({
-      email: saEmail,
-      key: saKey,
-      scopes: ["https://www.googleapis.com/auth/drive"],
-    });
-    const drive = google.drive({ version: "v3", auth });
-    const name = `Aurion ${prop?.name_en ?? "Handover"} ${h.shift_date} ${h.id.slice(0, 8)}.pdf`;
-    const res = await drive.files.create({
-      requestBody: { name, parents: [folderId] },
-      media: { mimeType: "application/pdf", body: Readable.from(pdf) },
-      fields: "id",
-      supportsAllDrives: true,
-    });
+    const path = `${code}/${h.shift_date}-${h.id.slice(0, 8)}.pdf`;
+    const { error: upErr } = await supabase.storage
+      .from(ARCHIVE_BUCKET)
+      .upload(path, pdf, { contentType: "application/pdf", upsert: true });
+    if (upErr) throw upErr;
     await supabase
       .from("handovers")
-      .update({ drive_file_id: res.data.id, drive_uploaded_at: new Date().toISOString(), drive_error: null })
+      .update({ pdf_path: path, pdf_archived_at: new Date().toISOString(), pdf_archive_error: null })
       .eq("id", h.id);
-    await logAudit({ action: "drive_uploaded", handoverId: h.id, meta: { fileId: res.data.id } });
+    await logAudit({ action: "drive_uploaded", handoverId: h.id, meta: { path } });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "drive upload failed";
-    await supabase.from("handovers").update({ drive_error: msg }).eq("id", h.id);
+    const msg = err instanceof Error ? err.message : "pdf archive failed";
+    await supabase.from("handovers").update({ pdf_archive_error: msg }).eq("id", h.id);
   }
 }
 
@@ -84,10 +67,9 @@ export async function POST(req: Request) {
   const saEmail = process.env.GOOGLE_SA_EMAIL;
   const saKey = process.env.GOOGLE_SA_PRIVATE_KEY?.replace(/\\n/g, "\n");
 
-  // Archive the PDF to the hotel's Drive folder (idempotent, independent of Sheets).
-  if (saEmail && saKey) {
-    await archiveToDrive(supabase, h as never, saEmail, saKey);
-  }
+  // Archive the branded PDF to Supabase Storage per hotel (idempotent, independent
+  // of Sheets, never blocking).
+  await archiveToStorage(supabase, h as never);
 
   // Idempotent: already sheet-synced → no double-append (Drive handled above).
   if (h.synced_to_sheets) {

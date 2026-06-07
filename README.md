@@ -52,7 +52,7 @@ Google service-account credentials for this project.
 | `ADMIN2_EMAIL` / `ADMIN2_PASSWORD` / `ADMIN2_NAME` | server | Second seed admin |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | public | Web Push (browser subscribe) |
 | `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` | server | Web Push (server send) |
-| `DRIVE_FOLDER_AL_AQEEQ` / `DRIVE_FOLDER_AS_SALAAM` | server | Per-hotel Drive folder IDs for PDF archive |
+| _(PDF archive uses the Supabase `handover-pdfs` bucket — no extra env needed)_ | — | — |
 | `RESEND_API_KEY` / `ALERT_FROM_EMAIL` / `MANAGER_ALERT_EMAIL` | server | Optional cash-mismatch email alert |
 
 ## Auth & roles
@@ -99,19 +99,16 @@ The sync runs only in the `/api/sync-handover` server route — the Google key n
 the browser. A Sheets failure never loses data: the handover is already saved in Supabase
 and flagged for re-sync.
 
-## Google Drive setup (per-hotel PDF archive)
+## PDF archive (per-hotel, Supabase Storage)
 
-Completed handovers upload a branded PDF to a per-hotel Drive folder via the **same
-service account** (Drive scope). The owner performs:
-
-1. Create two folders in Drive (e.g. "Aurion (Al-Aqeeq) Handovers", "Aurion (As-Salaam)
-   Handovers").
-2. **Share each folder with the service-account email as `Editor`** (Viewer is not
-   enough — uploads fail with "Insufficient permissions for the specified parent").
-3. Put each folder ID → `DRIVE_FOLDER_AL_AQEEQ` / `DRIVE_FOLDER_AS_SALAAM`.
-
-Failure never blocks a handover: `drive_error` is recorded and the detail page still
-works. A "View in Google Drive" link appears once uploaded.
+Completed handovers render a branded PDF and archive it to the private Supabase
+Storage bucket **`handover-pdfs`**, organised per hotel:
+`handover-pdfs/<property_code>/<date>-<id8>.pdf`. No setup or paid Google account
+needed — the bucket + RLS are created by migration. Admins open the archived copy via
+a short-lived signed URL ("View archived PDF" on the detail page; route
+`/api/handover-pdf?id=`). Failure never blocks a handover (`pdf_archive_error` is
+recorded). *(Google Drive was the original plan but service accounts can't own files
+in personal Drive — that needs a paid Workspace Shared Drive, so we use Storage.)*
 
 ## Web Push
 

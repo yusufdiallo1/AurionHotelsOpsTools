@@ -11,7 +11,7 @@ export default async function ManagerPage() {
 
   return (
     <>
-      <AppHeader titleKey="managerTitle" />
+      <AppHeader titleKey="managerTitle" hideLanguageToggle />
       <ManagerDashboard greetingName={session.profile.full_name} />
     </>
   );

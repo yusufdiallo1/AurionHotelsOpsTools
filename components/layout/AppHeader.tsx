@@ -16,11 +16,14 @@ export function AppHeader({
   propertyKey,
   steps,
   currentStep,
+  hideLanguageToggle = false,
 }: {
   titleKey?: StringKey;
   propertyKey?: StringKey;
   steps?: number;
   currentStep?: number;
+  // The manager page renders its own EN/ع/SV picker, so it hides this one.
+  hideLanguageToggle?: boolean;
 }) {
   const { t } = useLang();
   const { userId } = useAuth();
@@ -53,7 +56,7 @@ export function AppHeader({
         </Link>
 
         <div className="flex items-center gap-2">
-          <LanguageToggle />
+          {hideLanguageToggle ? null : <LanguageToggle />}
           {userId ? (
             <button
               type="button"

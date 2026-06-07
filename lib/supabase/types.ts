@@ -71,6 +71,9 @@ export type Database = {
           outgoing_name: string
           outgoing_signature_url: string | null
           outgoing_signed_at: string | null
+          pdf_archive_error: string | null
+          pdf_archived_at: string | null
+          pdf_path: string | null
           pending_requests: string | null
           property_id: string
           rooms_occupied: number
@@ -99,6 +102,9 @@ export type Database = {
           outgoing_name: string
           outgoing_signature_url?: string | null
           outgoing_signed_at?: string | null
+          pdf_archive_error?: string | null
+          pdf_archived_at?: string | null
+          pdf_path?: string | null
           pending_requests?: string | null
           property_id: string
           rooms_occupied: number
@@ -127,6 +133,9 @@ export type Database = {
           outgoing_name?: string
           outgoing_signature_url?: string | null
           outgoing_signed_at?: string | null
+          pdf_archive_error?: string | null
+          pdf_archived_at?: string | null
+          pdf_path?: string | null
           pending_requests?: string | null
           property_id?: string
           rooms_occupied?: number

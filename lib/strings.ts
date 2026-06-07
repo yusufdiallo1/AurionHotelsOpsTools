@@ -236,6 +236,7 @@ export const strings = {
   downloadPdf: { en: "Download PDF", ar: "تنزيل PDF" },
   preparingPdf: { en: "Preparing…", ar: "جارٍ التجهيز…" },
   viewInDrive: { en: "View in Google Drive", ar: "عرض في Google Drive" },
+  viewArchivedPdf: { en: "View archived PDF", ar: "عرض PDF المؤرشف" },
 
   // ── Realtime ─────────────────────────────────────────────────────
   live: { en: "Live", ar: "مباشر" },
