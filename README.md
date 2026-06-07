@@ -47,14 +47,29 @@ Google service-account credentials for this project.
 | `HANDOVER_SHEET_ID` | server | Target Google Sheet ID (bare) |
 | `MANAGER_PASSCODE` | server | Unlocks `/manager` (manager phase) |
 | `NEXT_PUBLIC_SITE_URL` | public | Absolute base URL (links, redirects) |
-| `NEXT_PUBLIC_DEFAULT_LANG` | public | First-paint language: `en` or `ar` |
+| `NEXT_PUBLIC_DEFAULT_LANG` | public | First-paint language: `en` or `ar` (default `ar`) |
+| `ADMIN1_EMAIL` / `ADMIN1_PASSWORD` / `ADMIN1_NAME` | server | First seed admin (used by `scripts/seed-admins.mjs`) |
+| `ADMIN2_EMAIL` / `ADMIN2_PASSWORD` / `ADMIN2_NAME` | server | Second seed admin |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | public | Web Push (browser subscribe) |
+| `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` | server | Web Push (server send) |
+| `DRIVE_FOLDER_AL_AQEEQ` / `DRIVE_FOLDER_AS_SALAAM` | server | Per-hotel Drive folder IDs for PDF archive |
 | `RESEND_API_KEY` / `ALERT_FROM_EMAIL` / `MANAGER_ALERT_EMAIL` | server | Optional cash-mismatch email alert |
+
+## Auth & roles
+
+Supabase Auth (email + password). Roles live in `profiles.role` (`admin` |
+`receptionist`). Seed the two admins once: `node scripts/seed-admins.mjs` (reads
+`ADMIN{1,2}_*` from `.env.local`). Admins create receptionists/admins from `/admin`.
+`middleware.ts` redirects unauthenticated users to `/login`; `/history`, `/manager`,
+`/admin` are admin-only (server-enforced). Receptionists see Home + New + their
+incoming-handover notifications.
 
 ## Database
 
-Supabase project `ksocwxsdvlvtjdlelbnf`. The `properties` table is seeded
-(`al_aqeeq`, `as_salaam`, `quba`) with RLS enabled. The `handovers` table and the
-`signatures` Storage bucket are added in the wizard phase.
+Supabase project `ksocwxsdvlvtjdlelbnf`. `properties` seeded (`al_aqeeq`,
+`as_salaam`; each `total_rooms` 19). Tables: `handovers`, `profiles`, `notifications`,
+`push_subscriptions`, `audit_log`. RLS on all (authenticated for handovers/properties;
+self+admin for profiles; admin-read for audit_log).
 
 **Regenerate types after every migration:**
 
@@ -83,6 +98,33 @@ The user/owner performs these; the app codes against them:
 The sync runs only in the `/api/sync-handover` server route — the Google key never reaches
 the browser. A Sheets failure never loses data: the handover is already saved in Supabase
 and flagged for re-sync.
+
+## Google Drive setup (per-hotel PDF archive)
+
+Completed handovers upload a branded PDF to a per-hotel Drive folder via the **same
+service account** (Drive scope). The owner performs:
+
+1. Create two folders in Drive (e.g. "Aurion (Al-Aqeeq) Handovers", "Aurion (As-Salaam)
+   Handovers").
+2. **Share each folder with the service-account email as `Editor`** (Viewer is not
+   enough — uploads fail with "Insufficient permissions for the specified parent").
+3. Put each folder ID → `DRIVE_FOLDER_AL_AQEEQ` / `DRIVE_FOLDER_AS_SALAAM`.
+
+Failure never blocks a handover: `drive_error` is recorded and the detail page still
+works. A "View in Google Drive" link appears once uploaded.
+
+## Web Push
+
+VAPID keys: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (browser) + `VAPID_PRIVATE_KEY` (server).
+Generate with `npx web-push generate-vapid-keys`. The service worker is `public/sw.js`;
+receptionists are prompted to allow notifications after login. On Step-1 submit the
+incoming receptionist(s) of that hotel get an in-app notification + a Web Push.
+
+## Deploy (Vercel)
+
+Set **all** env vars above in Vercel, then `node scripts/seed-admins.mjs` once against
+production. Share the Drive folders + Sheet as Editor with the SA. Rotate the VAPID
+private key if it was ever shared.
 
 ## Conventions
 
