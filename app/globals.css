@@ -39,12 +39,45 @@
 html {
   background: var(--color-cream);
   color: var(--color-ink);
+  -webkit-text-size-adjust: 100%; /* iOS: don't auto-resize text on rotate */
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--color-cream);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none; /* avoid rubber-band revealing blank bg */
+}
+
+/* Kill the grey tap flash on mobile; we provide our own active states. */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tactile feedback: interactive elements gently depress on press (WWAD). */
+button:not(:disabled),
+a[href],
+[role="button"] {
+  transition:
+    transform 0.12s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+button:not(:disabled):active,
+a[href]:active,
+[role="button"]:active {
+  transform: scale(0.97);
+}
+
+/* Accessible, on-brand focus ring (keyboard users). */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-gold-deep);
+  outline-offset: 2px;
+  border-radius: 8px;
 }
 
 /* Arabic mode: applied on the tree when lang === 'ar'. */
@@ -102,5 +135,16 @@ select {
 
 /* Bottom-nav safe-area padding so content isn't hidden behind the fixed nav. */
 .pb-nav {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Respect reduced-motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
