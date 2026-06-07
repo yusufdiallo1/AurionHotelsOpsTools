@@ -30,7 +30,7 @@ export function AppHeader({
   const showSteps = typeof steps === "number" && typeof currentStep === "number";
 
   return (
-    <header className="glass-navy sticky top-0 z-30 text-cream md:static">
+    <header className="glass-navy sticky top-0 z-30 text-cream">
       <div className="mx-auto flex w-full max-w-[480px] items-center justify-between gap-3 px-5 py-3">
         <Link href="/" className="flex items-center gap-3">
           <Image
