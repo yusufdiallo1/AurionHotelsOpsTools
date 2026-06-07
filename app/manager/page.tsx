@@ -1,18 +1,18 @@
-import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { AppHeader } from "@/components/layout";
-import { MANAGER_COOKIE, cookieMatches } from "@/lib/manager-auth";
-import { UnlockForm } from "./UnlockForm";
+import { getSessionProfile } from "@/lib/auth";
 import { ManagerDashboard } from "./ManagerDashboard";
 
-// /manager — gated behind a shared passcode (cookie). The rest of the app is open.
+// /manager — admins only (enforced server-side). Non-admins are sent home.
 export default async function ManagerPage() {
-  const cookieStore = await cookies();
-  const unlocked = cookieMatches(cookieStore.get(MANAGER_COOKIE)?.value);
+  const session = await getSessionProfile();
+  if (!session) redirect("/login?next=/manager");
+  if (session.role !== "admin") redirect("/");
 
   return (
     <>
       <AppHeader titleKey="managerTitle" />
-      {unlocked ? <ManagerDashboard /> : <UnlockForm />}
+      <ManagerDashboard greetingName={session.profile.full_name} />
     </>
   );
 }

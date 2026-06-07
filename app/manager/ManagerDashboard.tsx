@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
+import { signOut } from "@/lib/sign-out";
 import { useHandoverRealtime, type RealtimeStatus } from "@/lib/useHandoverRealtime";
 import { useIdleLock } from "@/lib/useIdleLock";
 import { PROPERTIES, type PropertySlug } from "@/lib/properties";
@@ -55,8 +55,7 @@ function propName(r: ManagerRow, lang: ManagerLang): string {
   return lang === "ar" ? r.properties.name_ar : r.properties.name_en;
 }
 
-export function ManagerDashboard() {
-  const router = useRouter();
+export function ManagerDashboard({ greetingName = "" }: { greetingName?: string }) {
   const { lang: globalLang } = useLang();
 
   const [lang, setLang] = useState<ManagerLang>(globalLang);
@@ -69,9 +68,9 @@ export function ManagerDashboard() {
   const [rows, setRows] = useState<ManagerRow[]>([]);
   const [visible, setVisible] = useState(PAGE);
 
-  // Auto-lock after 5 min idle.
+  // Auto-lock after 5 min idle → sign out.
   useIdleLock(() => {
-    fetch("/api/manager-auth", { method: "DELETE" }).finally(() => router.refresh());
+    signOut();
   });
 
   const argsRef = useRef({ scope, selectedDate, property });
@@ -131,9 +130,8 @@ export function ManagerDashboard() {
     { channelName: "manager-dashboard" },
   );
 
-  async function handleLock() {
-    await fetch("/api/manager-auth", { method: "DELETE" });
-    router.refresh();
+  function handleLock() {
+    signOut();
   }
 
   // Snapshots use ALL handovers (latest state per property), regardless of the
@@ -187,6 +185,12 @@ export function ManagerDashboard() {
         </span>
         <div className="flex items-center gap-2">
           <LangPicker lang={lang} onChange={setLang} />
+          <Link
+            href="/admin"
+            className="glass rounded-full px-3.5 py-2 text-[13px] font-bold text-ink-soft"
+          >
+            {t("employees")}
+          </Link>
           <button
             type="button"
             onClick={handleLock}
@@ -196,6 +200,13 @@ export function ManagerDashboard() {
           </button>
         </div>
       </div>
+
+      {/* Greeting */}
+      {greetingName ? (
+        <p className="text-[15px] text-ink-soft">
+          {t("greeting")}, <span className="font-bold text-ink">{greetingName}</span>
+        </p>
+      ) : null}
 
       {/* HERO — portfolio KPIs */}
       <section className="glass-navy overflow-hidden rounded-[20px] p-5 text-cream">

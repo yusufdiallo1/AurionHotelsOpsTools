@@ -16,6 +16,18 @@ export const strings = {
   langEn: { en: "EN", ar: "EN" },
   langAr: { en: "ع", ar: "ع" },
 
+  // Auth / login
+  loginTitle: { en: "Sign in", ar: "تسجيل الدخول" },
+  loginSubtitle: { en: "Aurion staff access", ar: "دخول موظفي أوريون" },
+  emailLabel: { en: "Email", ar: "البريد الإلكتروني" },
+  emailPlaceholder: { en: "you@example.com", ar: "you@example.com" },
+  passwordLabel: { en: "Password", ar: "كلمة المرور" },
+  signIn: { en: "Sign in", ar: "دخول" },
+  signingIn: { en: "Signing in…", ar: "جارٍ الدخول…" },
+  signOut: { en: "Sign out", ar: "تسجيل الخروج" },
+  loginError: { en: "Wrong email or password.", ar: "بريد إلكتروني أو كلمة مرور غير صحيحة." },
+  greeting: { en: "Welcome", ar: "مرحبًا" },
+
   // Home navigation cards
   navNewTitle: { en: "New Handover", ar: "تسليم جديد" },
   navNewDesc: {

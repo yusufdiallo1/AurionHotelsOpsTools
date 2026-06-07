@@ -14,7 +14,9 @@ type Entry = Record<ManagerLang, string>;
 
 const M = {
   title: { en: "Manager", ar: "المدير", sv: "Chef" },
-  lock: { en: "Lock", ar: "قفل", sv: "Lås" },
+  lock: { en: "Sign out", ar: "تسجيل الخروج", sv: "Logga ut" },
+  greeting: { en: "Welcome", ar: "مرحبًا", sv: "Välkommen" },
+  employees: { en: "Employees", ar: "الموظفون", sv: "Anställda" },
   live: { en: "Live", ar: "مباشر", sv: "Live" },
   reconnecting: { en: "Reconnecting…", ar: "إعادة الاتصال…", sv: "Återansluter…" },
 

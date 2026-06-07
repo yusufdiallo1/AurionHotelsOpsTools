@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth-context";
 import type { StringKey } from "@/lib/strings";
 
 type NavItem = {
@@ -10,6 +11,7 @@ type NavItem = {
   labelKey: StringKey;
   icon: React.ReactNode;
   match: (path: string) => boolean;
+  adminOnly?: boolean;
 };
 
 const ITEMS: NavItem[] = [
@@ -30,12 +32,14 @@ const ITEMS: NavItem[] = [
     labelKey: "navHistory",
     match: (p) => p.startsWith("/history"),
     icon: <path d="M4 5h16M4 12h16M4 19h10" />,
+    adminOnly: true,
   },
   {
     href: "/manager",
     labelKey: "navManager",
     match: (p) => p.startsWith("/manager"),
     icon: <path d="M4 19V10M10 19V5M16 19v-7M22 19H2" />,
+    adminOnly: true,
   },
 ];
 
@@ -45,15 +49,18 @@ const ITEMS: NavItem[] = [
 // A solid glass "slider" animates to the active tab. Bilingual + RTL-aware.
 export function AppNav() {
   const { t, dir } = useLang();
+  const { role } = useAuth();
   const pathname = usePathname();
 
-  if (pathname.startsWith("/styleguide")) return null;
+  if (pathname.startsWith("/styleguide") || pathname.startsWith("/login")) return null;
 
+  // Receptionists see Home + New only; admins see everything.
+  const items = ITEMS.filter((it) => !it.adminOnly || role === "admin");
   const activeIndex = Math.max(
     0,
-    ITEMS.findIndex((it) => it.match(pathname)),
+    items.findIndex((it) => it.match(pathname)),
   );
-  const count = ITEMS.length;
+  const count = items.length;
   // Slider offset: in RTL the first item sits on the right, so move the slider
   // the other way.
   const pct = activeIndex * 100;
@@ -84,7 +91,7 @@ export function AppNav() {
           className="relative grid"
           style={{ gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))` }}
         >
-          {ITEMS.map((item, i) => {
+          {items.map((item, i) => {
             const active = i === activeIndex;
             return (
               <li key={item.href}>

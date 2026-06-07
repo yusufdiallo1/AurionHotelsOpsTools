@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useLang } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth-context";
+import { signOut } from "@/lib/sign-out";
 import type { StringKey } from "@/lib/strings";
 import { LanguageToggle } from "./LanguageToggle";
 import { StepProgress } from "./StepProgress";
@@ -21,6 +23,7 @@ export function AppHeader({
   currentStep?: number;
 }) {
   const { t } = useLang();
+  const { userId } = useAuth();
   const showSteps = typeof steps === "number" && typeof currentStep === "number";
 
   return (
@@ -49,7 +52,19 @@ export function AppHeader({
           </span>
         </Link>
 
-        <LanguageToggle />
+        <div className="flex items-center gap-2">
+          <LanguageToggle />
+          {userId ? (
+            <button
+              type="button"
+              onClick={signOut}
+              aria-label={t("signOut")}
+              className="rounded-full bg-white/10 px-3 py-2 text-[12px] font-bold text-cream/80 hover:text-cream"
+            >
+              {t("signOut")}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {showSteps ? (

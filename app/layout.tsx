@@ -6,6 +6,9 @@ import { LanguageProvider } from "@/lib/i18n";
 import { DEFAULT_LANG, LANG_COOKIE, isLang, dirFor } from "@/lib/i18n/config";
 import { SyncSweeper } from "@/components/SyncSweeper";
 import { AppNav } from "@/components/layout";
+import { getSessionProfile } from "@/lib/auth";
+import { AuthProvider } from "@/lib/auth-context";
+import { NotificationListener } from "@/components/NotificationListener";
 
 // Brand display — the AURION wordmark / headings. (CLAUDE.md §5)
 const cinzel = Cinzel({
@@ -49,6 +52,15 @@ export default async function RootLayout({
   const lang = isLang(cookieLang) ? cookieLang : DEFAULT_LANG;
   const dir = dirFor(lang);
 
+  const session = await getSessionProfile();
+  const authValue = {
+    userId: session?.userId ?? null,
+    role: session?.role ?? null,
+    fullName: session?.profile.full_name ?? "",
+    propertyId: session?.profile.property_id ?? null,
+  };
+  const signedIn = !!session;
+
   return (
     <html
       lang={lang}
@@ -62,11 +74,20 @@ export default async function RootLayout({
       ].join(" ")}
     >
       {/* pb-nav clears the bottom bar on mobile; md:pt-20 clears the top pill on desktop. */}
-      <body className="min-h-full bg-cream text-ink pb-nav md:pb-0 md:pt-20">
+      {/* pb-nav clears the bottom bar on mobile; md:pt-20 clears the top pill on desktop.
+          Only signed-in users see the nav (which adds the spacing), so login is full-bleed. */}
+      <body className={`min-h-full bg-cream text-ink ${signedIn ? "pb-nav md:pb-0 md:pt-20" : ""}`}>
         <LanguageProvider initialLang={lang}>
-          <SyncSweeper />
-          {children}
-          <AppNav />
+          <AuthProvider value={authValue}>
+            {signedIn ? <SyncSweeper /> : null}
+            {children}
+            {signedIn ? (
+              <>
+                <NotificationListener />
+                <AppNav />
+              </>
+            ) : null}
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

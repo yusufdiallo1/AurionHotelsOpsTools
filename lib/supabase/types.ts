@@ -1,6 +1,5 @@
-// Generated Supabase types. Regenerate after every migration (CLAUDE.md):
-//   Supabase MCP `generate_typescript_types` (CLI gen fails on access control), then
-//   paste here. Browser uses anon key only; service_role server-side only.
+// Generated Supabase types. Regenerate after every migration via the Supabase MCP
+// `generate_typescript_types` tool (CLI gen fails on access control), then paste here.
 
 export type Json =
   | string
@@ -11,8 +10,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -104,6 +101,50 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          active: boolean
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          property_id: string | null
+          role: string
+          shift_type: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id: string
+          phone?: string | null
+          property_id?: string | null
+          role?: string
+          shift_type?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          property_id?: string | null
+          role?: string
+          shift_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       properties: {
         Row: {
           code: string
@@ -136,7 +177,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
