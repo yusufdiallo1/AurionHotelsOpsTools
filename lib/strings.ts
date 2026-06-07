@@ -28,6 +28,30 @@ export const strings = {
   loginError: { en: "Wrong email or password.", ar: "بريد إلكتروني أو كلمة مرور غير صحيحة." },
   greeting: { en: "Welcome", ar: "مرحبًا" },
 
+  // Admin / employees
+  adminTitle: { en: "Employees", ar: "الموظفون" },
+  addEmployee: { en: "Add employee", ar: "إضافة موظف" },
+  roleLabel: { en: "Role", ar: "الدور" },
+  roleReceptionist: { en: "Receptionist", ar: "موظف استقبال" },
+  roleAdmin: { en: "Admin", ar: "مدير" },
+  receptionNameLabel: { en: "Reception name", ar: "اسم موظف الاستقبال" },
+  shiftTimeLabel: { en: "Shift", ar: "الوردية" },
+  phoneLabel: { en: "Phone (optional)", ar: "الهاتف (اختياري)" },
+  tempPasswordLabel: { en: "Temporary password", ar: "كلمة مرور مؤقتة" },
+  generate: { en: "Generate", ar: "توليد" },
+  createEmployee: { en: "Create", ar: "إنشاء" },
+  creating: { en: "Creating…", ar: "جارٍ الإنشاء…" },
+  employeeCreated: { en: "Employee created.", ar: "تم إنشاء الموظف." },
+  employeeError: { en: "Could not create. Check the email isn't already used.", ar: "تعذّر الإنشاء. تحقّق أن البريد غير مستخدم." },
+  noEmployees: { en: "No employees yet.", ar: "لا يوجد موظفون بعد." },
+  activeLabel: { en: "Active", ar: "نشط" },
+  inactiveLabel: { en: "Inactive", ar: "غير نشط" },
+  deactivate: { en: "Deactivate", ar: "إيقاف" },
+  activate: { en: "Activate", ar: "تفعيل" },
+  backToManager: { en: "Back to dashboard", ar: "العودة للوحة" },
+  copyCreds: { en: "Copy login", ar: "نسخ بيانات الدخول" },
+  copied: { en: "Copied", ar: "تم النسخ" },
+
   // Home navigation cards
   navNewTitle: { en: "New Handover", ar: "تسليم جديد" },
   navNewDesc: {
