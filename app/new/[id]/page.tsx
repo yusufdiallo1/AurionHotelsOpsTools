@@ -56,11 +56,16 @@ export default async function ContinueHandoverPage({
     return <PlaceholderPage titleKey="alreadyCompleted" />;
   }
 
+  // Pre-fill the incoming receptionist's own name (locked) when a receptionist
+  // is signed in — they shouldn't retype who they are.
+  const incomingName = session?.role === "receptionist" ? (session.profile.full_name ?? "") : "";
+
   return (
     <IncomingForm
       handover={handover}
       propertyName={property?.name_en ?? ""}
       propertyNameAr={property?.name_ar ?? ""}
+      lockedIncomingName={incomingName}
     />
   );
 }

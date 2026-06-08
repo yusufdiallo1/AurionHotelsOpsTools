@@ -40,17 +40,21 @@ export function IncomingForm({
   handover,
   propertyName,
   propertyNameAr,
+  lockedIncomingName = "",
 }: {
   handover: Handover;
   propertyName: string;
   propertyNameAr: string;
+  lockedIncomingName?: string;
 }) {
   const { t, lang } = useLang();
   const online = useOnline();
   const propName = lang === "ar" ? propertyNameAr : propertyName;
 
+  // A signed-in receptionist confirms as themselves — name is pre-filled + locked.
+  const lockName = lockedIncomingName.trim().length > 0;
   const [step, setStep] = useState<2 | 3>(2);
-  const [incomingName, setIncomingName] = useState("");
+  const [incomingName, setIncomingName] = useState(lockedIncomingName);
   const [recount, setRecount] = useState("");
   const [varianceNote, setVarianceNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -181,14 +185,25 @@ export function IncomingForm({
           ) : null}
         </section>
 
-        <TextField
-          labelKey="fieldIncomingName"
-          placeholderKey="fieldIncomingNamePlaceholder"
-          value={incomingName}
-          onChange={setIncomingName}
-          autoComplete="name"
-          maxLength={MAX_NAME}
-        />
+        {lockName ? (
+          <div>
+            <span className="mb-1.5 block text-[13px] font-bold text-ink">
+              {t("fieldIncomingName")}
+            </span>
+            <div className="flex min-h-[52px] items-center rounded-aurion border border-line bg-paper-tint px-4 font-bold text-ink">
+              {incomingName}
+            </div>
+          </div>
+        ) : (
+          <TextField
+            labelKey="fieldIncomingName"
+            placeholderKey="fieldIncomingNamePlaceholder"
+            value={incomingName}
+            onChange={setIncomingName}
+            autoComplete="name"
+            maxLength={MAX_NAME}
+          />
+        )}
 
         <NumberField
           labelKey="fieldCashRecount"
