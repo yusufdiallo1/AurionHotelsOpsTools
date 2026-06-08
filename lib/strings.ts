@@ -306,6 +306,7 @@ export const strings = {
   // Shift-end lock + early leave
   handoverLockedTitle: { en: "Handover not open yet", ar: "التسليم غير متاح بعد" },
   handoverOpensIn: { en: "Opens in", ar: "يفتح خلال" },
+  handoverOpensAt: { en: "Opens at", ar: "يفتح في" },
   leaveEarly: { en: "Need to leave early?", ar: "تحتاج المغادرة مبكرًا؟" },
   requestEarlyLeave: { en: "Request early leave", ar: "طلب مغادرة مبكرة" },
   earlyRequested: { en: "Waiting for the next receptionist to approve…", ar: "في انتظار موافقة موظف الوردية التالية…" },

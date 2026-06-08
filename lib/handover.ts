@@ -19,31 +19,52 @@ export const SHIFT_OPTIONS: { value: ShiftType; k: StringKey }[] = [
 const SHIFT_END_HOUR: Record<ShiftType, number> = {
   morning: 15,
   afternoon: 23,
-  night: 7, // ends next day at 07:00
+  night: 7, // ends 07:00 the following morning
 };
-export const HANDOVER_WINDOW_MIN = 30; // unlock this many minutes before shift end
+// Handover window: from 30 min BEFORE shift end until 90 min AFTER shift end.
+export const WINDOW_BEFORE_MIN = 30;
+export const WINDOW_AFTER_MIN = 90;
+const MIN = 60_000;
 
 /**
- * The Date when the given shift ends, relative to `now`. For the night shift the
- * end is 07:00 the following day (if we're still before 07:00, it's today).
+ * Resolve the handover window relative to `now`.
+ *  open      — true when now ∈ [end−30min, end+90min]
+ *  opensAt   — Date the (current or next) window opens
+ *  closesAt  — Date the current window closes (end+90min)
+ *  opensInMs — ms until opensAt (≤0 while open)
+ *
+ * Picks the *current* shift-end occurrence if its window hasn't fully closed yet;
+ * otherwise rolls to the next day's occurrence. This means: locked DURING the
+ * shift body, open in the last 30 min + 90 min after end, then locked again
+ * (showing the next day's window).
  */
-export function shiftEndAt(shift: ShiftType, now: Date): Date {
-  const end = new Date(now);
+export function handoverWindow(shift: ShiftType, now: Date): {
+  open: boolean;
+  opensAt: Date;
+  closesAt: Date;
+  opensInMs: number;
+} {
   const h = SHIFT_END_HOUR[shift];
+  // Candidate end = today at h:00.
+  const end = new Date(now);
   end.setHours(h, 0, 0, 0);
-  // If that end time already passed today, the relevant end is tomorrow — except
-  // the night shift, whose 07:00 end is "today" when we're in the small hours.
-  if (end.getTime() <= now.getTime() - 12 * 3600_000) {
-    end.setDate(end.getDate() + 1);
-  } else if (end.getTime() < now.getTime() && shift !== "night") {
+  // If this occurrence's window has already CLOSED (now > end+90min), roll forward a day.
+  if (now.getTime() > end.getTime() + WINDOW_AFTER_MIN * MIN) {
     end.setDate(end.getDate() + 1);
   }
-  return end;
+  const opensAt = new Date(end.getTime() - WINDOW_BEFORE_MIN * MIN);
+  const closesAt = new Date(end.getTime() + WINDOW_AFTER_MIN * MIN);
+  const open = now.getTime() >= opensAt.getTime() && now.getTime() <= closesAt.getTime();
+  return { open, opensAt, closesAt, opensInMs: opensAt.getTime() - now.getTime() };
 }
 
-/** ms until the handover window opens (30 min before shift end). ≤0 means open. */
-export function msUntilWindow(shift: ShiftType, now: Date): number {
-  return shiftEndAt(shift, now).getTime() - HANDOVER_WINDOW_MIN * 60_000 - now.getTime();
+/** 12-hour clock label, e.g. "2:30 PM". */
+export function formatClock12(d: Date): string {
+  let h = d.getHours();
+  const m = d.getMinutes();
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
 /** Today's date as YYYY-MM-DD in local time (source-of-truth Western form). */

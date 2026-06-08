@@ -6,7 +6,7 @@ import { AppHeader } from "@/components/layout";
 import { useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { createClient } from "@/lib/supabase/client";
-import { msUntilWindow, type ShiftType } from "@/lib/handover";
+import { handoverWindow, formatClock12, type ShiftType } from "@/lib/handover";
 
 // Gate for /new: a receptionist can only start a handover within 30 min of their
 // shift end — unless they've requested early leave and the next-shift receptionist
@@ -65,16 +65,17 @@ export function HandoverGate({ children }: { children: React.ReactNode }) {
   if (role !== "receptionist" || !shiftType) return <>{children}</>;
   if (!now) return null; // wait for the client clock
 
-  const remainingMs = msUntilWindow(shiftType as ShiftType, now);
-  const open = remainingMs <= 0 || early === "approved";
+  const win = handoverWindow(shiftType as ShiftType, now);
+  const open = win.open || early === "approved";
   if (open) return <>{children}</>;
 
+  // Within an hour → live MM:SS countdown; further out → show the clock time it opens.
+  const remainingMs = win.opensInMs;
   const totalSec = Math.max(0, Math.floor(remainingMs / 1000));
-  const hh = Math.floor(totalSec / 3600);
-  const mm = Math.floor((totalSec % 3600) / 60);
-  const ss = totalSec % 60;
   const pad = (n: number) => String(n).padStart(2, "0");
-  const countdown = hh > 0 ? `${hh}:${pad(mm)}:${pad(ss)}` : `${pad(mm)}:${pad(ss)}`;
+  const showCountdown = remainingMs <= 60 * 60_000;
+  const countdown = `${pad(Math.floor(totalSec / 60))}:${pad(totalSec % 60)}`;
+  const opensClock = formatClock12(win.opensAt);
 
   async function requestEarly() {
     if (busy) return;
@@ -105,8 +106,17 @@ export function HandoverGate({ children }: { children: React.ReactNode }) {
         <div>
           <h1 className="text-[22px] font-bold text-ink">{t("handoverLockedTitle")}</h1>
           <p className="mt-2 text-[15px] text-ink-soft">
-            {t("handoverOpensIn")}{" "}
-            <span className="font-bold text-ink" dir="ltr">{countdown}</span>
+            {showCountdown ? (
+              <>
+                {t("handoverOpensIn")}{" "}
+                <span className="font-bold text-ink" dir="ltr">{countdown}</span>
+              </>
+            ) : (
+              <>
+                {t("handoverOpensAt")}{" "}
+                <span className="font-bold text-ink" dir="ltr">{opensClock}</span>
+              </>
+            )}
           </p>
         </div>
 
