@@ -25,7 +25,14 @@ export const strings = {
   signIn: { en: "Sign in", ar: "دخول" },
   signingIn: { en: "Signing in…", ar: "جارٍ الدخول…" },
   signOut: { en: "Sign out", ar: "تسجيل الخروج" },
-  loginError: { en: "Wrong email or password.", ar: "بريد إلكتروني أو كلمة مرور غير صحيحة." },
+  confirmSignOutTitle: { en: "Sign out of Aurion?", ar: "تسجيل الخروج من أوريون؟" },
+  loginError: { en: "Wrong username or password.", ar: "اسم المستخدم أو كلمة المرور غير صحيحة." },
+  errUserNotFound: { en: "Username not found.", ar: "اسم المستخدم غير موجود." },
+  errWrongPassword: { en: "Wrong password.", ar: "كلمة المرور غير صحيحة." },
+  errLocked: {
+    en: "Account locked after too many attempts. Ask a manager to unlock it.",
+    ar: "تم قفل الحساب بعد محاولات كثيرة. اطلب من المدير فتحه.",
+  },
   greeting: { en: "Welcome", ar: "مرحبًا" },
 
   // Admin / employees
@@ -58,6 +65,7 @@ export const strings = {
   inactiveLabel: { en: "Inactive", ar: "غير نشط" },
   deactivate: { en: "Deactivate", ar: "إيقاف" },
   activate: { en: "Activate", ar: "تفعيل" },
+  lockedBadge: { en: "Locked", ar: "مقفل" },
   backToManager: { en: "Back to dashboard", ar: "العودة للوحة" },
   copyCreds: { en: "Copy login", ar: "نسخ بيانات الدخول" },
   copied: { en: "Copied", ar: "تم النسخ" },

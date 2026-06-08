@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import { SHIFT_OPTIONS, formatDate } from "@/lib/handover";
+import { HandoverModal } from "@/components/HandoverModal";
 import type { StringKey } from "@/lib/strings";
 
 export type MyHandover = {
@@ -29,6 +30,7 @@ export function ReceptionistHome({
 }) {
   const { t, lang } = useLang();
   const [pend, setPend] = useState<MyHandover[]>(pending);
+  const [viewId, setViewId] = useState<string | null>(null);
 
   const shiftLabel = (s: string) =>
     t(SHIFT_OPTIONS.find((o) => o.value === s)?.k ?? ("shiftLabel" as StringKey));
@@ -117,10 +119,11 @@ export function ReceptionistHome({
             {mine.map((h) => {
               const iAmOutgoing = (h.outgoing_name ?? "").trim().toLowerCase() === myName.trim().toLowerCase();
               return (
-                <Link
+                <button
                   key={h.id}
-                  href={`/handover/${h.id}`}
-                  className="flex items-center justify-between gap-3 rounded-aurion border border-line bg-paper px-4 py-3"
+                  type="button"
+                  onClick={() => setViewId(h.id)}
+                  className="flex w-full items-center justify-between gap-3 rounded-aurion border border-line bg-paper px-4 py-3 text-start"
                 >
                   <span className="flex flex-col">
                     <span className="text-[14px] font-bold text-ink">
@@ -142,12 +145,14 @@ export function ReceptionistHome({
                       {iAmOutgoing ? t("outgoingTag") : t("incomingTag")}
                     </span>
                   </span>
-                </Link>
+                </button>
               );
             })}
           </ul>
         )}
       </section>
+
+      {viewId ? <HandoverModal id={viewId} onClose={() => setViewId(null)} /> : null}
     </main>
   );
 }

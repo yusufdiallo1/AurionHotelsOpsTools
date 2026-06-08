@@ -206,8 +206,10 @@ export type Database = {
           active: boolean
           created_at: string | null
           email: string
+          failed_attempts: number
           full_name: string
           id: string
+          locked: boolean
           phone: string | null
           property_id: string | null
           role: string
@@ -218,8 +220,10 @@ export type Database = {
           active?: boolean
           created_at?: string | null
           email?: string
+          failed_attempts?: number
           full_name?: string
           id: string
+          locked?: boolean
           phone?: string | null
           property_id?: string | null
           role?: string
@@ -230,8 +234,10 @@ export type Database = {
           active?: boolean
           created_at?: string | null
           email?: string
+          failed_attempts?: number
           full_name?: string
           id?: string
+          locked?: boolean
           phone?: string | null
           property_id?: string | null
           role?: string

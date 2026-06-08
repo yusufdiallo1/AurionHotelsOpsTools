@@ -16,6 +16,7 @@ export type EmployeeRow = {
   active: boolean;
   created_at: string | null;
   work_days: number[] | null;
+  locked: boolean;
 };
 type Property = { id: string; code: string; name_en: string; name_ar: string };
 
@@ -115,6 +116,7 @@ export function AdminEmployees({
               phone: phone.trim() || null,
               active: true,
               created_at: new Date().toISOString(),
+              locked: false,
             },
             ...prev,
           ]);
@@ -139,6 +141,15 @@ export function AdminEmployees({
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: emp.id, active: next }),
+    });
+  }
+
+  async function unlock(emp: EmployeeRow) {
+    setRows((prev) => prev.map((r) => (r.id === emp.id ? { ...r, locked: false } : r)));
+    await fetch("/api/admin/users", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: emp.id, locked: false }),
     });
   }
 
@@ -349,18 +360,34 @@ export function AdminEmployees({
                   ) : null}
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${emp.active ? "bg-green-100 text-green-800" : "bg-line text-ink-soft"}`}
-                  >
-                    {emp.active ? t("activeLabel") : t("inactiveLabel")}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => toggleActive(emp)}
-                    className="text-[12px] font-bold text-gold-deep"
-                  >
-                    {emp.active ? t("deactivate") : t("activate")}
-                  </button>
+                  {emp.locked ? (
+                    <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-bold text-red-700">
+                      {t("lockedBadge")}
+                    </span>
+                  ) : (
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${emp.active ? "bg-green-100 text-green-800" : "bg-line text-ink-soft"}`}
+                    >
+                      {emp.active ? t("activeLabel") : t("inactiveLabel")}
+                    </span>
+                  )}
+                  {emp.locked ? (
+                    <button
+                      type="button"
+                      onClick={() => unlock(emp)}
+                      className="text-[12px] font-bold text-red-700"
+                    >
+                      {t("unlock")}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => toggleActive(emp)}
+                      className="text-[12px] font-bold text-gold-deep"
+                    >
+                      {emp.active ? t("deactivate") : t("activate")}
+                    </button>
+                  )}
                 </div>
               </li>
             ))}

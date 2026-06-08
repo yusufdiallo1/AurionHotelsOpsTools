@@ -96,6 +96,11 @@ export async function PATCH(req: Request) {
   if (b.phone !== undefined) patch.phone = b.phone;
   if (b.work_days !== undefined && b.work_days !== null) patch.work_days = b.work_days;
   if (typeof b.active === "boolean") patch.active = b.active;
+  // Unlock: clear the lock + reset the failed-attempt counter.
+  if (typeof (b as { locked?: boolean }).locked === "boolean") {
+    patch.locked = (b as { locked?: boolean }).locked;
+    if (!(b as { locked?: boolean }).locked) patch.failed_attempts = 0;
+  }
   const { error } = await admin.from("profiles").update(patch).eq("id", body.id);
   if (error) return Response.json({ ok: false, error: error.message }, { status: 400 });
   return Response.json({ ok: true });

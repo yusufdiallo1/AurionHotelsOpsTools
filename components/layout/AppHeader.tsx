@@ -4,10 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
-import { signOut } from "@/lib/sign-out";
 import type { StringKey } from "@/lib/strings";
 import { LanguageToggle } from "./LanguageToggle";
 import { NotificationBell } from "./NotificationBell";
+import { SignOutButton } from "./SignOutButton";
 import { StepProgress } from "./StepProgress";
 
 // Navy app bar: logo + optional title/property, the language toggle, and an
@@ -61,16 +61,7 @@ export function AppHeader({
         <div className="flex items-center gap-2">
           {userId ? <NotificationBell /> : null}
           {hideLanguageToggle ? null : <LanguageToggle />}
-          {userId ? (
-            <button
-              type="button"
-              onClick={signOut}
-              aria-label={t("signOut")}
-              className="rounded-full bg-red-600 px-3 py-2 text-[12px] font-bold text-white hover:bg-red-700"
-            >
-              {t("signOut")}
-            </button>
-          ) : null}
+          {userId ? <SignOutButton /> : null}
         </div>
       </div>
 

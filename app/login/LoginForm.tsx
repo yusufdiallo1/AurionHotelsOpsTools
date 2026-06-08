@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useLang } from "@/lib/i18n";
-import { createClient } from "@/lib/supabase/client";
 import { LanguageToggle } from "@/components/layout";
+import type { StringKey } from "@/lib/strings";
 
 export function LoginForm() {
   const { t } = useLang();
@@ -15,30 +15,38 @@ export function LoginForm() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(false);
+  const [errorKey, setErrorKey] = useState<StringKey | null>(null);
 
   async function handleSignIn() {
     if (!identifier || !password || submitting) return;
     setSubmitting(true);
-    setError(false);
-    // Staff log in with a username → mapped to the hidden internal email.
-    // Admins may still enter their full email (contains "@").
-    const raw = identifier.trim();
-    const email = raw.includes("@")
-      ? raw.toLowerCase()
-      : `${raw.toLowerCase().replace(/[^a-z0-9._-]/g, "")}@aurion.local`;
-    const supabase = createClient();
-    const { error: err } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (err) {
-      setError(true);
+    setErrorKey(null);
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: identifier.trim(), password }),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        // Full reload so middleware + server layout pick up the new session.
+        window.location.assign(next);
+        return;
+      }
+      setErrorKey(
+        json.reason === "not_found"
+          ? "errUserNotFound"
+          : json.reason === "locked"
+            ? "errLocked"
+            : json.reason === "wrong_password"
+              ? "errWrongPassword"
+              : "loginError",
+      );
+    } catch {
+      setErrorKey("loginError");
+    } finally {
       setSubmitting(false);
-      return;
     }
-    // Full reload so middleware + server layout pick up the new session.
-    window.location.assign(next);
   }
 
   return (
@@ -75,7 +83,7 @@ export function LoginForm() {
             value={identifier}
             onChange={(e) => {
               setIdentifier(e.target.value);
-              setError(false);
+              setErrorKey(null);
             }}
             placeholder={t("usernamePlaceholder")}
             className="min-h-[52px] w-full rounded-aurion border border-line bg-paper px-4 text-ink placeholder:text-muted outline-none focus:border-gold-deep"
@@ -90,7 +98,7 @@ export function LoginForm() {
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
-              setError(false);
+              setErrorKey(null);
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSignIn();
@@ -99,9 +107,9 @@ export function LoginForm() {
           />
         </label>
 
-        {error ? (
+        {errorKey ? (
           <p role="alert" className="text-[14px] font-medium text-red-700">
-            {t("loginError")}
+            {t(errorKey)}
           </p>
         ) : null}
 
