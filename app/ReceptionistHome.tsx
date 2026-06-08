@@ -119,7 +119,7 @@ export function ReceptionistHome({
               return (
                 <Link
                   key={h.id}
-                  href={`/new/${h.id}`}
+                  href={`/handover/${h.id}`}
                   className="flex items-center justify-between gap-3 rounded-aurion border border-line bg-paper px-4 py-3"
                 >
                   <span className="flex flex-col">
