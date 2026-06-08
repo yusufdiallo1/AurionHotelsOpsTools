@@ -128,7 +128,9 @@ export function HandoverGate({ children }: { children: React.ReactNode }) {
           <p className="rounded-aurion border-2 border-red-600 bg-red-50 px-4 py-3 text-[14px] font-medium text-red-800">
             {t("earlyDenied")}
           </p>
-        ) : (
+        ) : win.canRequestEarly ? (
+          /* Only while still on shift — once the shift has ended there's nothing
+             to leave early from, so the screen is just locked until the next day. */
           <div className="flex w-full flex-col items-center gap-2">
             <p className="text-[14px] text-ink-soft">{t("leaveEarly")}</p>
             <button
@@ -140,7 +142,7 @@ export function HandoverGate({ children }: { children: React.ReactNode }) {
               {t("requestEarlyLeave")}
             </button>
           </div>
-        )}
+        ) : null}
 
         <Link href="/" className="text-[14px] font-bold text-gold-deep">
           {t("navHome")}

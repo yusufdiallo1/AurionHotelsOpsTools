@@ -43,19 +43,27 @@ export function handoverWindow(shift: ShiftType, now: Date): {
   opensAt: Date;
   closesAt: Date;
   opensInMs: number;
+  /** True while still on shift today (before shift end), where leaving early is meaningful. */
+  canRequestEarly: boolean;
 } {
   const h = SHIFT_END_HOUR[shift];
   // Candidate end = today at h:00.
   const end = new Date(now);
   end.setHours(h, 0, 0, 0);
   // If this occurrence's window has already CLOSED (now > end+90min), roll forward a day.
+  let rolled = false;
   if (now.getTime() > end.getTime() + WINDOW_AFTER_MIN * MIN) {
     end.setDate(end.getDate() + 1);
+    rolled = true;
   }
   const opensAt = new Date(end.getTime() - WINDOW_BEFORE_MIN * MIN);
   const closesAt = new Date(end.getTime() + WINDOW_AFTER_MIN * MIN);
   const open = now.getTime() >= opensAt.getTime() && now.getTime() <= closesAt.getTime();
-  return { open, opensAt, closesAt, opensInMs: opensAt.getTime() - now.getTime() };
+  // Early-leave only makes sense while still on shift TODAY (locked, before the
+  // pre-window, same-day occurrence). Once the shift + grace has passed (window
+  // rolled to the next day) there's nothing to leave early from → no button.
+  const canRequestEarly = !open && !rolled && now.getTime() < opensAt.getTime();
+  return { open, opensAt, closesAt, opensInMs: opensAt.getTime() - now.getTime(), canRequestEarly };
 }
 
 /** 12-hour clock label, e.g. "2:30 PM". */
