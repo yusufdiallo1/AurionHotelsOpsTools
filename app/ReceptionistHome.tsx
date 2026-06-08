@@ -19,18 +19,32 @@ export type MyHandover = {
   properties: { name_en: string; name_ar: string } | null;
 };
 
+type EarlyReq = { id: string; requester_name: string };
+
 export function ReceptionistHome({
   myName,
   pending,
   mine,
+  earlyRequests = [],
 }: {
   myName: string;
   pending: MyHandover[];
   mine: MyHandover[];
+  earlyRequests?: EarlyReq[];
 }) {
   const { t, lang } = useLang();
   const [pend, setPend] = useState<MyHandover[]>(pending);
+  const [early, setEarly] = useState<EarlyReq[]>(earlyRequests);
   const [viewId, setViewId] = useState<string | null>(null);
+
+  async function resolveEarly(id: string, action: "approve" | "deny") {
+    setEarly((prev) => prev.filter((r) => r.id !== id));
+    await fetch("/api/early-leave", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, id }),
+    });
+  }
 
   const shiftLabel = (s: string) =>
     t(SHIFT_OPTIONS.find((o) => o.value === s)?.k ?? ("shiftLabel" as StringKey));
@@ -67,6 +81,36 @@ export function ReceptionistHome({
 
   return (
     <main className="mx-auto flex w-full max-w-[480px] flex-col gap-5 px-5 py-6">
+      {/* Early-leave requests to approve (from the previous-shift receptionist) */}
+      {early.length > 0 ? (
+        <section className="flex flex-col gap-3">
+          {early.map((r) => (
+            <div key={r.id} className="rounded-aurion border-2 border-gold bg-gold-tint/50 p-4">
+              <p className="text-[15px] font-bold text-ink">{t("earlyLeaveRequestTitle")}</p>
+              <p className="mt-0.5 text-[13px] text-ink-soft">
+                <span className="font-bold text-ink">{r.requester_name}</span> {t("earlyLeaveRequestBody")}
+              </p>
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => resolveEarly(r.id, "approve")}
+                  className="min-h-[44px] flex-1 rounded-aurion bg-navy text-[15px] font-bold text-cream"
+                >
+                  {t("approve")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => resolveEarly(r.id, "deny")}
+                  className="min-h-[44px] flex-1 rounded-aurion border border-line-strong bg-paper text-[15px] font-bold text-ink"
+                >
+                  {t("deny")}
+                </button>
+              </div>
+            </div>
+          ))}
+        </section>
+      ) : null}
+
       {/* Pending incoming handovers — confirm now */}
       {pend.length > 0 ? (
         <section className="flex flex-col gap-3">

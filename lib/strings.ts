@@ -303,6 +303,22 @@ export const strings = {
   incomingTag: { en: "Incoming", ar: "مُستلِم" },
   loggedInAs: { en: "Signed in as", ar: "تسجيل الدخول باسم" },
 
+  // Shift-end lock + early leave
+  handoverLockedTitle: { en: "Handover not open yet", ar: "التسليم غير متاح بعد" },
+  handoverOpensIn: { en: "Opens in", ar: "يفتح خلال" },
+  leaveEarly: { en: "Need to leave early?", ar: "تحتاج المغادرة مبكرًا؟" },
+  requestEarlyLeave: { en: "Request early leave", ar: "طلب مغادرة مبكرة" },
+  earlyRequested: { en: "Waiting for the next receptionist to approve…", ar: "في انتظار موافقة موظف الوردية التالية…" },
+  earlyApproved: { en: "Early leave approved — you can start the handover.", ar: "تمت الموافقة على المغادرة المبكرة — يمكنك بدء التسليم." },
+  earlyDenied: { en: "Early leave was declined.", ar: "تم رفض المغادرة المبكرة." },
+  // Approval card (next-shift receptionist)
+  earlyLeaveRequestTitle: { en: "Early-leave request", ar: "طلب مغادرة مبكرة" },
+  earlyLeaveRequestBody: { en: "wants to leave early and hand over now.", ar: "يريد المغادرة مبكرًا والتسليم الآن." },
+  approve: { en: "Approve", ar: "موافقة" },
+  deny: { en: "Decline", ar: "رفض" },
+  // Block 2 awaiting
+  alreadyAwaiting: { en: "You already have a handover awaiting confirmation. Finish it first.", ar: "لديك تسليم بانتظار التأكيد بالفعل. أكمله أولًا." },
+
   // Notifications modal
   notificationsTitle: { en: "Notifications", ar: "الإشعارات" },
   notificationsEmpty: { en: "No notifications.", ar: "لا توجد إشعارات." },

@@ -15,6 +15,37 @@ export const SHIFT_OPTIONS: { value: ShiftType; k: StringKey }[] = [
   { value: "afternoon", k: "shiftAfternoon" },
 ];
 
+// Fixed shift end times (local hours): morning 07–15, afternoon 15–23, night 23–07.
+const SHIFT_END_HOUR: Record<ShiftType, number> = {
+  morning: 15,
+  afternoon: 23,
+  night: 7, // ends next day at 07:00
+};
+export const HANDOVER_WINDOW_MIN = 30; // unlock this many minutes before shift end
+
+/**
+ * The Date when the given shift ends, relative to `now`. For the night shift the
+ * end is 07:00 the following day (if we're still before 07:00, it's today).
+ */
+export function shiftEndAt(shift: ShiftType, now: Date): Date {
+  const end = new Date(now);
+  const h = SHIFT_END_HOUR[shift];
+  end.setHours(h, 0, 0, 0);
+  // If that end time already passed today, the relevant end is tomorrow — except
+  // the night shift, whose 07:00 end is "today" when we're in the small hours.
+  if (end.getTime() <= now.getTime() - 12 * 3600_000) {
+    end.setDate(end.getDate() + 1);
+  } else if (end.getTime() < now.getTime() && shift !== "night") {
+    end.setDate(end.getDate() + 1);
+  }
+  return end;
+}
+
+/** ms until the handover window opens (30 min before shift end). ≤0 means open. */
+export function msUntilWindow(shift: ShiftType, now: Date): number {
+  return shiftEndAt(shift, now).getTime() - HANDOVER_WINDOW_MIN * 60_000 - now.getTime();
+}
+
 /** Today's date as YYYY-MM-DD in local time (source-of-truth Western form). */
 export function todayIso(): string {
   const d = new Date();

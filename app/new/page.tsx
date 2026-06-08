@@ -29,6 +29,7 @@ import {
   type ShiftType,
 } from "@/lib/handover";
 import { displayDigits } from "@/lib/digits";
+import { HandoverGate } from "./HandoverGate";
 import type { StringKey } from "@/lib/strings";
 
 const DRAFT_KEY = "aurion-handover-draft-v1";
@@ -70,6 +71,14 @@ function LockedField({ labelKey, value }: { labelKey: StringKey; value: string }
 }
 
 export default function NewHandoverPage() {
+  return (
+    <HandoverGate>
+      <HandoverWizard />
+    </HandoverGate>
+  );
+}
+
+function HandoverWizard() {
   const { t, lang } = useLang();
   const router = useRouter();
   const online = useOnline();
@@ -231,6 +240,23 @@ export default function NewHandoverPage() {
     setError(null);
     try {
       const supabase = createClient();
+
+      // Block a second outstanding handover: a receptionist can't start a new one
+      // while they already have one awaiting the incoming confirmation.
+      if (d.name.trim()) {
+        const { data: awaiting } = await supabase
+          .from("handovers")
+          .select("id")
+          .eq("status", "pending_incoming")
+          .ilike("outgoing_name", d.name.trim())
+          .limit(1);
+        if (awaiting && awaiting.length > 0) {
+          setError(t("alreadyAwaiting"));
+          setSubmitting(false);
+          return;
+        }
+      }
+
       const prop = PROPERTIES.find((p) => p.slug === d.property);
       const { data: propRow, error: propErr } = await withRetry(async () =>
         supabase.from("properties").select("id").eq("code", prop!.slug).single(),

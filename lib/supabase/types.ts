@@ -53,6 +53,56 @@ export type Database = {
           },
         ]
       }
+      early_leave_requests: {
+        Row: {
+          approver_id: string | null
+          approver_name: string | null
+          created_at: string | null
+          id: string
+          property_id: string
+          requester_id: string
+          requester_name: string
+          resolved_at: string | null
+          shift_date: string
+          shift_type: string
+          status: string
+        }
+        Insert: {
+          approver_id?: string | null
+          approver_name?: string | null
+          created_at?: string | null
+          id?: string
+          property_id: string
+          requester_id: string
+          requester_name?: string
+          resolved_at?: string | null
+          shift_date: string
+          shift_type: string
+          status?: string
+        }
+        Update: {
+          approver_id?: string | null
+          approver_name?: string | null
+          created_at?: string | null
+          id?: string
+          property_id?: string
+          requester_id?: string
+          requester_name?: string
+          resolved_at?: string | null
+          shift_date?: string
+          shift_type?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "early_leave_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       handovers: {
         Row: {
           cash_drawer: number
