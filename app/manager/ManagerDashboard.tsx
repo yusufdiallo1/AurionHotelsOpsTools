@@ -8,7 +8,6 @@ import { signOut } from "@/lib/sign-out";
 import { DateField } from "@/components/ui";
 import { ActivityLog } from "./ActivityLog";
 import { useHandoverRealtime } from "@/lib/useHandoverRealtime";
-import { useIdleLock } from "@/lib/useIdleLock";
 import { PROPERTIES, type PropertySlug } from "@/lib/properties";
 import { todayIso } from "@/lib/handover";
 import {
@@ -70,10 +69,8 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
   const [rows, setRows] = useState<ManagerRow[]>([]);
   const [visible, setVisible] = useState(PAGE);
 
-  // Auto-lock after 5 min idle → sign out.
-  useIdleLock(() => {
-    signOut();
-  });
+  // Idle auto-logout is handled globally (IdleLogout in the layout: admin 2 min,
+  // receptionist 3 min, with a last-minute countdown).
 
   const argsRef = useRef({ scope, selectedDate, property });
   useEffect(() => {

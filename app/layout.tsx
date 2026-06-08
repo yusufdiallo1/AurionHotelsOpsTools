@@ -9,6 +9,7 @@ import { AppNav } from "@/components/layout";
 import { getSessionProfile } from "@/lib/auth";
 import { AuthProvider } from "@/lib/auth-context";
 import { NotificationListener } from "@/components/NotificationListener";
+import { IdleLogout } from "@/components/IdleLogout";
 
 // Brand display — the AURION wordmark / headings. (CLAUDE.md §5)
 const cinzel = Cinzel({
@@ -86,6 +87,7 @@ export default async function RootLayout({
             {signedIn ? (
               <>
                 <NotificationListener />
+                <IdleLogout />
                 <AppNav />
               </>
             ) : null}

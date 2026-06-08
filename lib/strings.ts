@@ -268,6 +268,15 @@ export const strings = {
   confirmedBy: { en: "Confirmed by", ar: "أكّده" },
   backHome: { en: "Back to home", ar: "العودة للرئيسية" },
 
+  // Idle auto-logout
+  idleTitle: { en: "Are you still there?", ar: "هل ما زلت هنا؟" },
+  idleBody: {
+    en: "You'll be signed out automatically in",
+    ar: "سيتم تسجيل خروجك تلقائيًا خلال",
+  },
+  idleSeconds: { en: "seconds", ar: "ثانية" },
+  stillHere: { en: "I'm still here", ar: "ما زلت هنا" },
+
   // ── Manager: passcode gate ───────────────────────────────────────
   managerTitle: { en: "Manager", ar: "المدير" },
   managerLocked: { en: "Manager access", ar: "دخول المدير" },
