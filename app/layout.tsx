@@ -79,7 +79,7 @@ export default async function RootLayout({
       {/* pb-nav clears the bottom bar on mobile; md:pt-20 clears the top pill on desktop. */}
       {/* pb-nav clears the bottom bar on mobile; md:pt-20 clears the top pill on desktop.
           Only signed-in users see the nav (which adds the spacing), so login is full-bleed. */}
-      <body className={`min-h-full bg-cream text-ink ${signedIn ? "pb-nav md:pb-0 md:pt-20" : ""}`}>
+      <body className={`min-h-full bg-cream text-ink ${signedIn ? "pb-nav md:pb-0 md:pt-16" : ""}`}>
         <LanguageProvider initialLang={lang}>
           <AuthProvider value={authValue}>
             {signedIn ? <SyncSweeper /> : null}

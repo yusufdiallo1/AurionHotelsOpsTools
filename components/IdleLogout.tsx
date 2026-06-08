@@ -92,7 +92,7 @@ export function IdleLogout() {
           <button
             type="button"
             onClick={() => signOut()}
-            className="min-h-[50px] rounded-aurion border border-line-strong bg-paper text-[16px] font-bold text-ink"
+            className="min-h-[50px] rounded-aurion border border-line-strong bg-paper text-[16px] font-bold text-ink transition-colors hover:border-red-600 hover:bg-red-600 hover:text-white"
           >
             {t("signOut")}
           </button>

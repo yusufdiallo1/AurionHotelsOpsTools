@@ -80,7 +80,7 @@ export function AppNav() {
       className={[
         "fixed inset-x-0 z-40 flex justify-center px-3",
         "bottom-0 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2", // mobile: bottom bar
-        "md:bottom-auto md:top-2 md:pb-0 md:pt-2", // desktop: docked on the header band
+        "md:bottom-auto md:top-[68px] md:pb-0 md:pt-2", // desktop: just BELOW the header bar
       ].join(" ")}
     >
       <div className="relative w-full max-w-[480px] rounded-[22px] border border-gold/25 bg-navy p-1.5 shadow-[0_8px_30px_rgba(19,30,51,0.45)] md:w-auto">
