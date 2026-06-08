@@ -4,10 +4,12 @@ export type Lang = "en" | "ar";
 
 export const LANGS: readonly Lang[] = ["en", "ar"] as const;
 
-// Default UI language for first paint, from NEXT_PUBLIC_DEFAULT_LANG ('en' | 'ar').
-// The toggle still switches instantly at runtime. (CLAUDE.md §6)
+// Default UI language for first paint. Arabic is the hard default for this app
+// (Saudi hotels); only an explicit NEXT_PUBLIC_DEFAULT_LANG="en" overrides it.
+// Falling back to Arabic means production never shows English just because the
+// env var is unset. The toggle still switches instantly at runtime. (CLAUDE.md §6)
 export const DEFAULT_LANG: Lang =
-  process.env.NEXT_PUBLIC_DEFAULT_LANG === "ar" ? "ar" : "en";
+  process.env.NEXT_PUBLIC_DEFAULT_LANG === "en" ? "en" : "ar";
 
 // Cookie the server root layout reads to set <html lang dir> on first paint (no flash).
 export const LANG_COOKIE = "aurion_lang";
