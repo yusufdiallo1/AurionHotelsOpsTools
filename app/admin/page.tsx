@@ -3,6 +3,7 @@ import { AppHeader } from "@/components/layout";
 import { getSessionProfile } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { AdminEmployees, type EmployeeRow } from "./AdminEmployees";
+import { ChangePassword } from "./ChangePassword";
 
 // /admin — employee management. Admins only.
 export default async function AdminPage() {
@@ -28,6 +29,9 @@ export default async function AdminPage() {
         initial={(profiles ?? []) as EmployeeRow[]}
         properties={(properties ?? []) as { id: string; code: string; name_en: string; name_ar: string }[]}
       />
+      <div className="mx-auto w-full max-w-[680px] px-4 pb-8">
+        <ChangePassword />
+      </div>
     </>
   );
 }

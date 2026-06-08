@@ -66,6 +66,15 @@ export const strings = {
   deactivate: { en: "Deactivate", ar: "إيقاف" },
   activate: { en: "Activate", ar: "تفعيل" },
   lockedBadge: { en: "Locked", ar: "مقفل" },
+
+  // Admin change own password
+  changePassword: { en: "Change my password", ar: "تغيير كلمة المرور" },
+  currentPassword: { en: "Current password", ar: "كلمة المرور الحالية" },
+  newPassword: { en: "New password", ar: "كلمة المرور الجديدة" },
+  savePassword: { en: "Update password", ar: "تحديث كلمة المرور" },
+  passwordChanged: { en: "Password updated.", ar: "تم تحديث كلمة المرور." },
+  errWrongCurrent: { en: "Current password is wrong.", ar: "كلمة المرور الحالية غير صحيحة." },
+  errPasswordShort: { en: "New password must be at least 6 characters.", ar: "كلمة المرور الجديدة 6 أحرف على الأقل." },
   backToManager: { en: "Back to dashboard", ar: "العودة للوحة" },
   copyCreds: { en: "Copy login", ar: "نسخ بيانات الدخول" },
   copied: { en: "Copied", ar: "تم النسخ" },
