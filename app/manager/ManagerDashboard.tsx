@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
-import { signOut } from "@/lib/sign-out";
 import { DateField } from "@/components/ui";
 import { ActivityLog } from "./ActivityLog";
 import { useHandoverRealtime } from "@/lib/useHandoverRealtime";
@@ -130,9 +129,6 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
     { channelName: "manager-dashboard" },
   );
 
-  function handleLock() {
-    signOut();
-  }
 
   // Snapshots use ALL handovers (latest state per property), regardless of the
   // week/all toggle, so "cash in drawer" + occupancy always reflect reality.
@@ -174,24 +170,9 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
       dir={dir}
       className={`mx-auto flex w-full max-w-[680px] flex-col gap-4 px-4 py-5 ${lang === "ar" ? "font-ar" : ""}`}
     >
-      {/* Top bar */}
+      {/* Top bar — language only; sign-out lives in the app header. */}
       <div className="flex items-center justify-end gap-3">
-        <div className="flex items-center gap-2">
-          <LangPicker lang={lang} onChange={setLang} />
-          <Link
-            href="/admin"
-            className="glass rounded-full px-3.5 py-2 text-[13px] font-bold text-ink-soft"
-          >
-            {t("employees")}
-          </Link>
-          <button
-            type="button"
-            onClick={handleLock}
-            className="glass rounded-full px-3.5 py-2 text-[13px] font-bold text-ink-soft"
-          >
-            {t("lock")}
-          </button>
-        </div>
+        <LangPicker lang={lang} onChange={setLang} />
       </div>
 
       {/* Greeting */}
@@ -222,6 +203,17 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
           />
         </div>
       </section>
+
+      {/* Manage employees — clearly a button, below the KPIs. */}
+      <Link
+        href="/admin"
+        className="flex min-h-[52px] items-center justify-center gap-2 rounded-aurion bg-navy text-[16px] font-bold text-cream shadow-md hover:bg-navy-deep"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-5 w-5">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        {t("employees")}
+      </Link>
 
       {/* By-property snapshot cards */}
       <div className="grid gap-3 sm:grid-cols-2">
