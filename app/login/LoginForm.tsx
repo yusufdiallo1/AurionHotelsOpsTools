@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useLang } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/layout";
+import { PasswordField } from "@/components/ui";
 import type { StringKey } from "@/lib/strings";
 
 export function LoginForm() {
@@ -91,19 +92,13 @@ export function LoginForm() {
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="text-[13px] font-bold text-ink">{t("passwordLabel")}</span>
-          <input
-            type="password"
-            dir="ltr"
-            autoComplete="current-password"
+          <PasswordField
             value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
+            onChange={(v) => {
+              setPassword(v);
               setErrorKey(null);
             }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleSignIn();
-            }}
-            className="min-h-[52px] w-full rounded-aurion border border-line bg-paper px-4 text-ink outline-none focus:border-gold-deep"
+            onEnter={handleSignIn}
           />
         </label>
 

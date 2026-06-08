@@ -9,3 +9,4 @@ export { SyncBadge } from "./SyncBadge";
 export { LiveIndicator } from "./LiveIndicator";
 export { ConfirmDialog } from "./ConfirmDialog";
 export { DateField } from "./DateField";
+export { PasswordField } from "./PasswordField";

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLang } from "@/lib/i18n";
+import { PasswordField } from "@/components/ui";
 import type { StringKey } from "@/lib/strings";
 
 // Admin changes their own password (current + new, verified server-side).
@@ -12,9 +13,6 @@ export function ChangePassword() {
   const [next, setNext] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; key: StringKey } | null>(null);
-
-  const inputCls =
-    "min-h-[48px] w-full rounded-aurion border border-line bg-paper px-4 text-ink outline-none focus:border-gold-deep";
 
   async function submit() {
     if (busy || !current || next.length < 6) return;
@@ -73,11 +71,19 @@ export function ChangePassword() {
         <div className="mt-4 flex flex-col gap-3">
           <label className="flex flex-col gap-1.5">
             <span className="text-[13px] font-bold text-ink">{t("currentPassword")}</span>
-            <input type="password" dir="ltr" autoComplete="current-password" value={current} onChange={(e) => { setCurrent(e.target.value); setMsg(null); }} className={inputCls} />
+            <PasswordField
+              autoComplete="current-password"
+              value={current}
+              onChange={(v) => { setCurrent(v); setMsg(null); }}
+            />
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="text-[13px] font-bold text-ink">{t("newPassword")}</span>
-            <input type="password" dir="ltr" autoComplete="new-password" value={next} onChange={(e) => { setNext(e.target.value); setMsg(null); }} className={inputCls} />
+            <PasswordField
+              autoComplete="new-password"
+              value={next}
+              onChange={(v) => { setNext(v); setMsg(null); }}
+            />
           </label>
           {msg ? (
             <p className={`text-[14px] font-medium ${msg.ok ? "text-green-700" : "text-red-700"}`}>{t(msg.key)}</p>
