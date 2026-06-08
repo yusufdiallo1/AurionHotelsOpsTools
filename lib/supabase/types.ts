@@ -64,6 +64,7 @@ export type Database = {
           drive_uploaded_at: string | null
           id: string
           incoming_name: string | null
+          incoming_rooms: number | null
           incoming_signature_url: string | null
           incoming_signed_at: string | null
           maintenance_issues: string | null
@@ -95,6 +96,7 @@ export type Database = {
           drive_uploaded_at?: string | null
           id?: string
           incoming_name?: string | null
+          incoming_rooms?: number | null
           incoming_signature_url?: string | null
           incoming_signed_at?: string | null
           maintenance_issues?: string | null
@@ -126,6 +128,7 @@ export type Database = {
           drive_uploaded_at?: string | null
           id?: string
           incoming_name?: string | null
+          incoming_rooms?: number | null
           incoming_signature_url?: string | null
           incoming_signed_at?: string | null
           maintenance_issues?: string | null

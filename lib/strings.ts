@@ -292,6 +292,10 @@ export const strings = {
   markAllRead: { en: "Mark all read", ar: "تعليم الكل كمقروء" },
   close: { en: "Close", ar: "إغلاق" },
 
+  // Incoming receptionist identity + room recount
+  incomingDetails: { en: "Incoming receptionist", ar: "موظف الاستقبال المُستلِم" },
+  fieldRoomsRecount: { en: "Rooms occupied (recount)", ar: "الغرف المشغولة (إعادة العدّ)" },
+
   // ── Manager: passcode gate ───────────────────────────────────────
   managerTitle: { en: "Manager", ar: "المدير" },
   managerLocked: { en: "Manager access", ar: "دخول المدير" },

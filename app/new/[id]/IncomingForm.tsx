@@ -41,11 +41,13 @@ export function IncomingForm({
   propertyName,
   propertyNameAr,
   lockedIncomingName = "",
+  incomingShift = "",
 }: {
   handover: Handover;
   propertyName: string;
   propertyNameAr: string;
   lockedIncomingName?: string;
+  incomingShift?: string;
 }) {
   const { t, lang } = useLang();
   const online = useOnline();
@@ -53,8 +55,11 @@ export function IncomingForm({
 
   // A signed-in receptionist confirms as themselves — name is pre-filled + locked.
   const lockName = lockedIncomingName.trim().length > 0;
+  const incomingShiftKey =
+    SHIFT_OPTIONS.find((s) => s.value === incomingShift)?.k ?? null;
   const [step, setStep] = useState<2 | 3>(2);
   const [incomingName, setIncomingName] = useState(lockedIncomingName);
+  const [rooms, setRooms] = useState("");
   const [recount, setRecount] = useState("");
   const [varianceNote, setVarianceNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -69,9 +74,14 @@ export function IncomingForm({
   );
   const hasMismatch = variance !== null && Math.abs(variance) > 0.005;
 
-  // Sign-off = typed name + timestamp (no drawn signature).
+  const roomsNum = rooms.trim() === "" ? null : parseInt(rooms, 10);
+
+  // Sign-off = typed name + timestamp (no drawn signature). The incoming
+  // receptionist must recount cash AND verify rooms occupied.
   const valid =
     incomingName.trim().length > 0 &&
+    roomsNum !== null &&
+    roomsNum >= 0 &&
     recountNum !== null &&
     recountNum >= 0 &&
     (!hasMismatch || varianceNote.trim().length > 0);
@@ -92,6 +102,7 @@ export function IncomingForm({
           .from("handovers")
           .update({
             incoming_name: incomingName.trim(),
+            incoming_rooms: roomsNum!,
             cash_recount: recountNum!,
             variance_note: hasMismatch ? varianceNote.trim() : null,
             incoming_signed_at: new Date().toISOString(),
@@ -132,15 +143,20 @@ export function IncomingForm({
           <p className="text-[15px] text-ink-soft">
             {syncRetry ? t("syncRetryNote") : t("successBody")}
           </p>
-          <Link
-            href="/new"
-            className="mt-2 flex min-h-[52px] w-full items-center justify-center rounded-aurion bg-navy text-[17px] font-bold text-cream"
-          >
-            {t("newHandover")}
-          </Link>
-          <Link href="/" className="text-[14px] font-bold text-gold-deep">
-            {t("back")}
-          </Link>
+          <div className="mt-2 flex w-full flex-col gap-2">
+            <Link
+              href="/"
+              className="flex min-h-[52px] w-full items-center justify-center rounded-aurion bg-navy text-[17px] font-bold text-cream"
+            >
+              {t("navHome")}
+            </Link>
+            <Link
+              href="/new"
+              className="flex min-h-[52px] w-full items-center justify-center rounded-aurion border border-line-strong bg-paper text-[17px] font-bold text-ink"
+            >
+              {t("newHandover")}
+            </Link>
+          </div>
         </main>
       </>
     );
@@ -186,14 +202,15 @@ export function IncomingForm({
         </section>
 
         {lockName ? (
-          <div>
-            <span className="mb-1.5 block text-[13px] font-bold text-ink">
-              {t("fieldIncomingName")}
-            </span>
-            <div className="flex min-h-[52px] items-center rounded-aurion border border-line bg-paper-tint px-4 font-bold text-ink">
-              {incomingName}
-            </div>
-          </div>
+          /* Incoming receptionist identity — name + shift + hotel, all locked. */
+          <section className="glass rounded-aurion p-4">
+            <h2 className="mb-2 text-[15px] font-bold text-ink">{t("incomingDetails")}</h2>
+            <SummaryRow label={t("fieldIncomingName")} value={incomingName} />
+            {incomingShiftKey ? (
+              <SummaryRow label={t("shiftLabel")} value={t(incomingShiftKey)} />
+            ) : null}
+            <SummaryRow label={t("propertyLabel")} value={propName} />
+          </section>
         ) : (
           <TextField
             labelKey="fieldIncomingName"
@@ -204,6 +221,14 @@ export function IncomingForm({
             maxLength={MAX_NAME}
           />
         )}
+
+        {/* Incoming receptionist re-verifies the room count + recounts cash. */}
+        <NumberField
+          labelKey="fieldRoomsRecount"
+          value={rooms}
+          onChange={setRooms}
+          mode="integer"
+        />
 
         <NumberField
           labelKey="fieldCashRecount"

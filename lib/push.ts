@@ -97,11 +97,9 @@ export async function notifyIncoming(handoverId: string): Promise<void> {
 
   const props = h.properties as { name_en?: string; name_ar?: string } | null;
   const hotelAr = props?.name_ar ?? props?.name_en ?? "الفندق";
-  const hotelEn = props?.name_en ?? "the hotel";
-  // Bilingual (Arabic-first, default language) — the server can't know each
-  // recipient's UI language, so include both.
-  const title = "تسليم وارد · Incoming handover";
-  const bodyText = `تسليم وردية في ${hotelAr} بانتظارك · A shift handover at ${hotelEn} is waiting for you.`;
+  // Arabic only (app default language).
+  const title = "تسليم وارد";
+  const bodyText = `تسليم وردية في ${hotelAr} بانتظارك`;
   const url = `/new/${h.id}`;
 
   // In-app notifications (realtime) for every recipient.

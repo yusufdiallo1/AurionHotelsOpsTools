@@ -56,9 +56,11 @@ export default async function ContinueHandoverPage({
     return <PlaceholderPage titleKey="alreadyCompleted" />;
   }
 
-  // Pre-fill the incoming receptionist's own name (locked) when a receptionist
-  // is signed in — they shouldn't retype who they are.
-  const incomingName = session?.role === "receptionist" ? (session.profile.full_name ?? "") : "";
+  // Pre-fill the incoming receptionist's own identity (locked) when a receptionist
+  // is signed in — name + their own shift.
+  const isRecep = session?.role === "receptionist";
+  const incomingName = isRecep ? (session!.profile.full_name ?? "") : "";
+  const incomingShift = isRecep ? (session!.profile.shift_type ?? "") : "";
 
   return (
     <IncomingForm
@@ -66,6 +68,7 @@ export default async function ContinueHandoverPage({
       propertyName={property?.name_en ?? ""}
       propertyNameAr={property?.name_ar ?? ""}
       lockedIncomingName={incomingName}
+      incomingShift={incomingShift}
     />
   );
 }
