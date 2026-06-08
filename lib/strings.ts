@@ -286,6 +286,12 @@ export const strings = {
   incomingTag: { en: "Incoming", ar: "مُستلِم" },
   loggedInAs: { en: "Signed in as", ar: "تسجيل الدخول باسم" },
 
+  // Notifications modal
+  notificationsTitle: { en: "Notifications", ar: "الإشعارات" },
+  notificationsEmpty: { en: "No notifications.", ar: "لا توجد إشعارات." },
+  markAllRead: { en: "Mark all read", ar: "تعليم الكل كمقروء" },
+  close: { en: "Close", ar: "إغلاق" },
+
   // ── Manager: passcode gate ───────────────────────────────────────
   managerTitle: { en: "Manager", ar: "المدير" },
   managerLocked: { en: "Manager access", ar: "دخول المدير" },
