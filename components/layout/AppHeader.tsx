@@ -8,6 +8,7 @@ import type { StringKey } from "@/lib/strings";
 import { LanguageToggle } from "./LanguageToggle";
 import { NotificationBell } from "./NotificationBell";
 import { SignOutButton } from "./SignOutButton";
+import { NavLinks } from "./BottomNav";
 import { StepProgress } from "./StepProgress";
 
 // Navy app bar: logo + optional title/property, the language toggle, and an
@@ -30,9 +31,11 @@ export function AppHeader({
   const { userId, fullName } = useAuth();
   const showSteps = typeof steps === "number" && typeof currentStep === "number";
 
+  // One unified top bar: logo (left) · nav (center, desktop) · actions (right).
+  // On mobile the nav lives in the bottom bar instead (AppNav).
   return (
     <header className="sticky top-0 z-30 bg-navy text-cream shadow-[0_2px_12px_rgba(19,30,51,0.25)]">
-      <div className="mx-auto flex w-full max-w-[480px] items-center justify-between gap-3 px-5 py-3">
+      <div className="mx-auto flex w-full max-w-[1100px] items-center justify-between gap-3 px-5 py-2.5">
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="/aurion-logo.png"
@@ -57,6 +60,13 @@ export function AppHeader({
             ) : null}
           </span>
         </Link>
+
+        {/* Centered nav — desktop only (mobile uses the bottom bar) */}
+        {userId ? (
+          <div className="hidden md:block">
+            <NavLinks variant="embedded" />
+          </div>
+        ) : null}
 
         <div className="flex items-center gap-2">
           {userId ? <NotificationBell /> : null}

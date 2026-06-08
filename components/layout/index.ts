@@ -3,4 +3,4 @@ export { LanguageToggle } from "./LanguageToggle";
 export { StepProgress } from "./StepProgress";
 export { ToolCard } from "./ToolCard";
 export { PlaceholderPage } from "./PlaceholderPage";
-export { AppNav, BottomNav } from "./BottomNav";
+export { AppNav, NavLinks } from "./BottomNav";
