@@ -77,6 +77,7 @@ export type Database = {
           pdf_path: string | null
           pending_requests: string | null
           property_id: string
+          rooms_note: string | null
           rooms_occupied: number
           sheet_sync_error: string | null
           sheet_synced_at: string | null
@@ -109,6 +110,7 @@ export type Database = {
           pdf_path?: string | null
           pending_requests?: string | null
           property_id: string
+          rooms_note?: string | null
           rooms_occupied: number
           sheet_sync_error?: string | null
           sheet_synced_at?: string | null
@@ -141,6 +143,7 @@ export type Database = {
           pdf_path?: string | null
           pending_requests?: string | null
           property_id?: string
+          rooms_note?: string | null
           rooms_occupied?: number
           sheet_sync_error?: string | null
           sheet_synced_at?: string | null

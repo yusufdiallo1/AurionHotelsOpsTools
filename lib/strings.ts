@@ -319,6 +319,8 @@ export const strings = {
   },
   expectedRooms: { en: "Outgoing count", ar: "عدّ المُسلِّم" },
   countedRooms: { en: "Your recount", ar: "إعادة عدّك" },
+  fieldRoomsNote: { en: "Rooms variance note (required)", ar: "ملاحظة فرق الغرف (مطلوبة)" },
+  fieldRoomsNotePlaceholder: { en: "Why is the room count different?", ar: "لماذا يختلف عدد الغرف؟" },
 
   // ── Manager: passcode gate ───────────────────────────────────────
   managerTitle: { en: "Manager", ar: "المدير" },

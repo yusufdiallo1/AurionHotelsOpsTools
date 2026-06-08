@@ -1,4 +1,5 @@
 // Server-side auth helpers. Use in Server Components / route handlers.
+import { cache } from "react";
 import { createServerClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types";
 
@@ -14,8 +15,12 @@ export type SessionProfile = {
   propertyCode: string | null;
 };
 
-/** The current authenticated user's profile, or null if not signed in. */
-export async function getSessionProfile(): Promise<SessionProfile | null> {
+/**
+ * The current authenticated user's profile, or null if not signed in.
+ * Wrapped in React cache() so the layout + the page in the same render share a
+ * SINGLE auth + profile lookup instead of each doing their own round-trip.
+ */
+export const getSessionProfile = cache(async function getSessionProfile(): Promise<SessionProfile | null> {
   const supabase = await createServerClient();
   const {
     data: { user },
@@ -39,7 +44,7 @@ export async function getSessionProfile(): Promise<SessionProfile | null> {
     profile: profile as Profile,
     propertyCode,
   };
-}
+});
 
 export async function isAdmin(): Promise<boolean> {
   return (await getSessionProfile())?.role === "admin";

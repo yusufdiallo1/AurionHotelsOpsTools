@@ -62,6 +62,7 @@ export function IncomingForm({
   const [rooms, setRooms] = useState("");
   const [recount, setRecount] = useState("");
   const [varianceNote, setVarianceNote] = useState("");
+  const [roomsNote, setRoomsNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [syncRetry, setSyncRetry] = useState(false);
@@ -78,18 +79,15 @@ export function IncomingForm({
   // Room mismatch: incoming recount differs from the outgoing rooms_occupied.
   const roomsMismatch = roomsNum !== null && roomsNum !== handover.rooms_occupied;
 
-  // A discrepancy (cash OR rooms) requires a written explanation before confirming.
-  const needsNote = hasMismatch || roomsMismatch;
-
-  // Sign-off = typed name + timestamp (no drawn signature). The incoming
-  // receptionist must recount cash AND verify rooms occupied.
+  // Each discrepancy gets its OWN required note.
   const valid =
     incomingName.trim().length > 0 &&
     roomsNum !== null &&
     roomsNum >= 0 &&
     recountNum !== null &&
     recountNum >= 0 &&
-    (!needsNote || varianceNote.trim().length > 0);
+    (!hasMismatch || varianceNote.trim().length > 0) &&
+    (!roomsMismatch || roomsNote.trim().length > 0);
 
   const shiftKey =
     SHIFT_OPTIONS.find((s) => s.value === (handover.shift_type as ShiftType))?.k ??
@@ -109,7 +107,8 @@ export function IncomingForm({
             incoming_name: incomingName.trim(),
             incoming_rooms: roomsNum!,
             cash_recount: recountNum!,
-            variance_note: needsNote ? varianceNote.trim() : null,
+            variance_note: hasMismatch ? varianceNote.trim() : null,
+            rooms_note: roomsMismatch ? roomsNote.trim() : null,
             incoming_signed_at: new Date().toISOString(),
             status: "completed",
           })
@@ -244,6 +243,13 @@ export function IncomingForm({
               <span dir="ltr">{t("expectedRooms")}: {handover.rooms_occupied}</span>
               <span dir="ltr">{t("countedRooms")}: {roomsNum}</span>
             </div>
+            <TextAreaField
+              labelKey="fieldRoomsNote"
+              placeholderKey="fieldRoomsNotePlaceholder"
+              value={roomsNote}
+              onChange={setRoomsNote}
+              maxLength={MAX_TEXTAREA}
+            />
           </div>
         ) : null}
 
@@ -282,18 +288,14 @@ export function IncomingForm({
                 {t("countedLabel")}: {formatSAR(recountNum, lang)}
               </span>
             </div>
+            <TextAreaField
+              labelKey="fieldVarianceNote"
+              placeholderKey="fieldVarianceNotePlaceholder"
+              value={varianceNote}
+              onChange={setVarianceNote}
+              maxLength={MAX_TEXTAREA}
+            />
           </div>
-        ) : null}
-
-        {/* Any discrepancy (cash or rooms) requires a written explanation */}
-        {needsNote ? (
-          <TextAreaField
-            labelKey="fieldVarianceNote"
-            placeholderKey="fieldVarianceNotePlaceholder"
-            value={varianceNote}
-            onChange={setVarianceNote}
-            maxLength={MAX_TEXTAREA}
-          />
         ) : null}
 
         {error ? (
