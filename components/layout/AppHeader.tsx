@@ -6,7 +6,6 @@ import { useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import type { StringKey } from "@/lib/strings";
 import { LanguageToggle } from "./LanguageToggle";
-import { NotificationBell } from "./NotificationBell";
 import { SignOutButton } from "./SignOutButton";
 import { NavLinks } from "./BottomNav";
 import { StepProgress } from "./StepProgress";
@@ -69,7 +68,6 @@ export function AppHeader({
         ) : null}
 
         <div className="flex items-center gap-2">
-          {userId ? <NotificationBell /> : null}
           {hideLanguageToggle ? null : <LanguageToggle />}
           {userId ? <SignOutButton /> : null}
         </div>

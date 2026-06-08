@@ -29,12 +29,21 @@ export async function POST(req: Request) {
   // 1) Does the account exist? + is it locked?
   const { data: profile } = await admin
     .from("profiles")
-    .select("id, locked, failed_attempts")
+    .select("id, locked, failed_attempts, is_temp, temp_active_until")
     .eq("email", email)
     .maybeSingle();
 
   if (!profile) {
     return Response.json({ ok: false, reason: "not_found" }, { status: 401 });
+  }
+  // Temp account whose activation window has passed → auto-lock it now.
+  if (
+    profile.is_temp &&
+    profile.temp_active_until &&
+    new Date(profile.temp_active_until).getTime() < Date.now()
+  ) {
+    await admin.from("profiles").update({ locked: true, active: false }).eq("id", profile.id);
+    return Response.json({ ok: false, reason: "locked" }, { status: 423 });
   }
   if (profile.locked) {
     return Response.json({ ok: false, reason: "locked" }, { status: 423 });

@@ -91,6 +91,9 @@ const M = {
   actSynced: { en: "Synced to Sheets", ar: "تمت المزامنة مع الجدول", sv: "Synkad till Sheets" },
   actDrive: { en: "Archived to Drive", ar: "تم الحفظ في Drive", sv: "Arkiverad till Drive" },
   viewItem: { en: "View", ar: "عرض", sv: "Visa" },
+  earlyLeaves: { en: "Early leaves today", ar: "المغادرات المبكرة اليوم", sv: "Tidiga avgångar idag" },
+  earlyLeavesNone: { en: "No early leaves today.", ar: "لا توجد مغادرات مبكرة اليوم.", sv: "Inga tidiga avgångar idag." },
+  leftEarly: { en: "requested early leave", ar: "طلب مغادرة مبكرة", sv: "begärde tidig avgång" },
 } as const satisfies Record<string, Entry>;
 
 export type ManagerKey = keyof typeof M;

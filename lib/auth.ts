@@ -34,6 +34,17 @@ export const getSessionProfile = cache(async function getSessionProfile(): Promi
     .maybeSingle();
   if (!profile) return null;
 
+  // A temp account whose coverage window has expired (or that's locked) is treated
+  // as signed-out → the app redirects it to /login, where it's hard-locked.
+  if (
+    profile.locked ||
+    (profile.is_temp &&
+      profile.temp_active_until &&
+      new Date(profile.temp_active_until).getTime() < Date.now())
+  ) {
+    return null;
+  }
+
   const propertyCode =
     (profile as { properties?: { code?: string } | null }).properties?.code ?? null;
 

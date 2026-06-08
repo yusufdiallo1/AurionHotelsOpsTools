@@ -6,6 +6,7 @@ import { useLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import { DateField } from "@/components/ui";
 import { ActivityLog } from "./ActivityLog";
+import { EarlyLeaveFeed } from "./EarlyLeaveFeed";
 import { useHandoverRealtime } from "@/lib/useHandoverRealtime";
 import { PROPERTIES, type PropertySlug } from "@/lib/properties";
 import { todayIso } from "@/lib/handover";
@@ -341,6 +342,9 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
           </ul>
         )}
       </Card>
+
+      {/* Early-leave requests today (info only) */}
+      <EarlyLeaveFeed lang={lang} />
 
       {/* Live activity feed (audit log) */}
       <ActivityLog lang={lang} />

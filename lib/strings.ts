@@ -320,6 +320,15 @@ export const strings = {
   // Block 2 awaiting
   alreadyAwaiting: { en: "You already have a handover awaiting confirmation. Finish it first.", ar: "لديك تسليم بانتظار التأكيد بالفعل. أكمله أولًا." },
 
+  // Temp accounts (admin)
+  tempAccounts: { en: "Temporary cover accounts", ar: "حسابات التغطية المؤقتة" },
+  tempActive: { en: "Active until", ar: "نشط حتى" },
+  tempInactive: { en: "Inactive", ar: "غير نشط" },
+  activateTemp: { en: "Activate for a shift", ar: "تفعيل لوردية" },
+  deactivateTemp: { en: "Deactivate now", ar: "إيقاف الآن" },
+  tempLogin: { en: "Login", ar: "تسجيل الدخول" },
+  pickShift: { en: "Which shift?", ar: "أي وردية؟" },
+
   // Notifications modal
   notificationsTitle: { en: "Notifications", ar: "الإشعارات" },
   notificationsEmpty: { en: "No notifications.", ar: "لا توجد إشعارات." },

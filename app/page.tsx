@@ -46,17 +46,6 @@ export default async function Home() {
     .order("created_at", { ascending: false })
     .limit(50);
 
-  // Pending early-leave requests at their hotel (not their own) — they can approve.
-  const { data: earlyRaw } = propertyId
-    ? await db
-        .from("early_leave_requests")
-        .select("id, requester_name, requester_id")
-        .eq("property_id", propertyId)
-        .eq("status", "pending")
-        .order("created_at", { ascending: false })
-    : { data: [] };
-  const earlyRequests = (earlyRaw ?? []).filter((r) => r.requester_id !== session.userId);
-
   return (
     <>
       <AppHeader />
@@ -64,7 +53,6 @@ export default async function Home() {
         myName={name}
         pending={(pending ?? []) as unknown as MyHandover[]}
         mine={(mineRaw ?? []) as unknown as MyHandover[]}
-        earlyRequests={earlyRequests as { id: string; requester_name: string }[]}
       />
     </>
   );

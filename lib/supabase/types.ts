@@ -262,11 +262,13 @@ export type Database = {
           failed_attempts: number
           full_name: string
           id: string
+          is_temp: boolean
           locked: boolean
           phone: string | null
           property_id: string | null
           role: string
           shift_type: string | null
+          temp_active_until: string | null
           work_days: number[]
         }
         Insert: {
@@ -276,11 +278,13 @@ export type Database = {
           failed_attempts?: number
           full_name?: string
           id: string
+          is_temp?: boolean
           locked?: boolean
           phone?: string | null
           property_id?: string | null
           role?: string
           shift_type?: string | null
+          temp_active_until?: string | null
           work_days?: number[]
         }
         Update: {
@@ -290,11 +294,13 @@ export type Database = {
           failed_attempts?: number
           full_name?: string
           id?: string
+          is_temp?: boolean
           locked?: boolean
           phone?: string | null
           property_id?: string | null
           role?: string
           shift_type?: string | null
+          temp_active_until?: string | null
           work_days?: number[]
         }
         Relationships: [
