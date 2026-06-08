@@ -277,6 +277,15 @@ export const strings = {
   idleSeconds: { en: "seconds", ar: "ثانية" },
   stillHere: { en: "I'm still here", ar: "ما زلت هنا" },
 
+  // Receptionist home
+  incomingWaitingTitle: { en: "Incoming handover — confirm now", ar: "تسليم وارد — أكِّد الآن" },
+  incomingWaitingBody: { en: "An outgoing receptionist handed off to you. Review and confirm.", ar: "قام موظف الاستقبال المُسلِّم بالتسليم إليك. راجع وأكِّد." },
+  myHandovers: { en: "My handovers", ar: "تسليماتي" },
+  noMyHandovers: { en: "No handovers yet.", ar: "لا توجد تسليمات بعد." },
+  outgoingTag: { en: "Outgoing", ar: "مُسلِّم" },
+  incomingTag: { en: "Incoming", ar: "مُستلِم" },
+  loggedInAs: { en: "Signed in as", ar: "تسجيل الدخول باسم" },
+
   // ── Manager: passcode gate ───────────────────────────────────────
   managerTitle: { en: "Manager", ar: "المدير" },
   managerLocked: { en: "Manager access", ar: "دخول المدير" },

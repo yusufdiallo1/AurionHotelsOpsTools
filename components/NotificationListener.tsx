@@ -60,6 +60,28 @@ export function NotificationListener() {
   useEffect(() => {
     if (!userId) return;
     const supabase = createClient();
+
+    // On load, surface the most recent UNREAD notification (so it works even if
+    // the user wasn't online when it was created).
+    (async () => {
+      const { data } = await supabase
+        .from("notifications")
+        .select("id, title, body, handover_id")
+        .eq("recipient_id", userId)
+        .eq("read", false)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      const n = data?.[0];
+      if (n) {
+        setToast({
+          id: n.id,
+          title: n.title || t("incomingHandoverTitle"),
+          body: n.body || t("incomingHandoverBody"),
+          handoverId: n.handover_id,
+        });
+      }
+    })();
+
     const channel = supabase
       .channel(`notif-${userId}`)
       .on(
@@ -93,20 +115,31 @@ export function NotificationListener() {
 
   if (!toast) return null;
 
+  async function markRead(id: string) {
+    try {
+      await createClient().from("notifications").update({ read: true }).eq("id", id);
+    } catch {
+      /* best-effort */
+    }
+  }
+
   return (
     <div
       dir={dir}
-      className="fixed inset-x-0 top-3 z-50 flex justify-center px-3 md:top-20"
+      className="fixed inset-x-0 top-20 z-50 flex justify-center px-3"
       role="alert"
     >
-      <div className="glass-navy w-full max-w-[440px] rounded-aurion p-4 text-cream shadow-[0_8px_30px_rgba(19,30,51,0.4)]">
+      <div className="w-full max-w-[440px] rounded-aurion border border-gold/30 bg-navy p-4 text-cream shadow-[0_8px_30px_rgba(19,30,51,0.5)]">
         <p className="text-[15px] font-bold">{toast.title}</p>
         <p className="mt-0.5 text-[13px] text-cream/80">{toast.body}</p>
         <div className="mt-3 flex gap-2">
           {toast.handoverId ? (
             <Link
               href={`/new/${toast.handoverId}`}
-              onClick={() => setToast(null)}
+              onClick={() => {
+                markRead(toast.id);
+                setToast(null);
+              }}
               className="min-h-[40px] flex-1 rounded-full bg-gold px-4 text-center text-[14px] font-bold leading-[40px] text-navy-deep"
             >
               {t("openHandover")}
@@ -114,7 +147,10 @@ export function NotificationListener() {
           ) : null}
           <button
             type="button"
-            onClick={() => setToast(null)}
+            onClick={() => {
+              markRead(toast.id);
+              setToast(null);
+            }}
             className="min-h-[40px] rounded-full bg-white/15 px-4 text-[14px] font-bold text-cream"
           >
             {t("dismiss")}

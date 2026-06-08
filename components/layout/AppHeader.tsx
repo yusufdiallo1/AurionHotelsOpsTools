@@ -26,11 +26,11 @@ export function AppHeader({
   hideLanguageToggle?: boolean;
 }) {
   const { t } = useLang();
-  const { userId } = useAuth();
+  const { userId, fullName } = useAuth();
   const showSteps = typeof steps === "number" && typeof currentStep === "number";
 
   return (
-    <header className="glass-navy sticky top-0 z-30 text-cream">
+    <header className="sticky top-0 z-30 bg-navy text-cream shadow-[0_2px_12px_rgba(19,30,51,0.25)]">
       <div className="mx-auto flex w-full max-w-[480px] items-center justify-between gap-3 px-5 py-3">
         <Link href="/" className="flex items-center gap-3">
           <Image
@@ -51,6 +51,8 @@ export function AppHeader({
             )}
             {propertyKey ? (
               <span className="text-[13px] text-gold-soft">{t(propertyKey)}</span>
+            ) : fullName ? (
+              <span className="text-[12px] text-gold-soft">{fullName}</span>
             ) : null}
           </span>
         </Link>

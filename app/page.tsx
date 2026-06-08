@@ -1,63 +1,59 @@
-"use client";
+import { getSessionProfile } from "@/lib/auth";
+import { createServiceClient } from "@/lib/supabase/server";
+import { AppHeader } from "@/components/layout";
+import { AdminHome } from "./AdminHome";
+import { ReceptionistHome, type MyHandover } from "./ReceptionistHome";
 
-import { AppHeader, ToolCard } from "@/components/layout";
-import { useAuth } from "@/lib/auth-context";
-import { HomeSearch } from "./HomeSearch";
+// Home. Admins: search + History + Manager. Receptionists: pending incoming
+// handovers to confirm + their own handover list.
+export default async function Home() {
+  const session = await getSessionProfile();
 
-function Icon({ d }: { d: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-6 w-6"
-    >
-      <path d={d} />
-    </svg>
+  if (!session || session.role === "admin") {
+    return (
+      <>
+        <AppHeader />
+        <AdminHome />
+      </>
+    );
+  }
+
+  // Receptionist: fetch what's theirs. (Service client; scoped by name/hotel below.)
+  const db = createServiceClient();
+  const name = session.profile.full_name ?? "";
+  const propertyId = session.profile.property_id;
+
+  // Pending incoming handovers at their hotel that AREN'T their own outgoing.
+  const { data: pendingRaw } = propertyId
+    ? await db
+        .from("handovers")
+        .select("id, outgoing_name, shift_type, created_at, properties(name_en, name_ar)")
+        .eq("property_id", propertyId)
+        .eq("status", "pending_incoming")
+        .order("created_at", { ascending: false })
+    : { data: [] };
+  const pending = (pendingRaw ?? []).filter(
+    (h) => (h.outgoing_name ?? "").trim().toLowerCase() !== name.trim().toLowerCase(),
   );
-}
 
-// Home: receptionists see New Handover only; admins also get search + History + Manager.
-export default function Home() {
-  const { role } = useAuth();
-  const isAdmin = role === "admin";
+  // Their own handovers — where they're outgoing OR incoming.
+  const { data: mineRaw } = await db
+    .from("handovers")
+    .select(
+      "id, outgoing_name, incoming_name, shift_type, shift_date, status, cash_drawer, rooms_occupied, created_at, properties(name_en, name_ar)",
+    )
+    .or(`outgoing_name.ilike.${name},incoming_name.ilike.${name}`)
+    .order("created_at", { ascending: false })
+    .limit(50);
 
   return (
     <>
       <AppHeader />
-
-      <main className="mx-auto flex w-full max-w-[480px] flex-col gap-3.5 px-5 py-8">
-        {isAdmin ? <HomeSearch /> : null}
-
-        {!isAdmin ? (
-          <ToolCard
-            href="/new"
-            titleKey="navNewTitle"
-            descKey="navNewDesc"
-            icon={<Icon d="M12 5v14M5 12h14" />}
-          />
-        ) : null}
-
-        {isAdmin ? (
-          <>
-            <ToolCard
-              href="/history"
-              titleKey="navHistoryTitle"
-              descKey="navHistoryDesc"
-              icon={<Icon d="M4 5h16M4 12h16M4 19h10" />}
-            />
-            <ToolCard
-              href="/manager"
-              titleKey="navManagerTitle"
-              descKey="navManagerDesc"
-              icon={<Icon d="M4 19V10M10 19V5M16 19v-7M22 19H2" />}
-            />
-          </>
-        ) : null}
-      </main>
+      <ReceptionistHome
+        myName={name}
+        pending={(pending ?? []) as unknown as MyHandover[]}
+        mine={(mineRaw ?? []) as unknown as MyHandover[]}
+      />
     </>
   );
 }
