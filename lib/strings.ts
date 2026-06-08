@@ -295,6 +295,13 @@ export const strings = {
   // Incoming receptionist identity + room recount
   incomingDetails: { en: "Incoming receptionist", ar: "موظف الاستقبال المُستلِم" },
   fieldRoomsRecount: { en: "Rooms occupied (recount)", ar: "الغرف المشغولة (إعادة العدّ)" },
+  roomsMismatchTitle: { en: "Room count doesn't match", ar: "عدد الغرف غير مطابق" },
+  roomsMismatchBody: {
+    en: "Your recount differs from the outgoing count. Add a note explaining why.",
+    ar: "إعادة عدّك تختلف عن عدّ المُسلِّم. أضف ملاحظة توضّح السبب.",
+  },
+  expectedRooms: { en: "Outgoing count", ar: "عدّ المُسلِّم" },
+  countedRooms: { en: "Your recount", ar: "إعادة عدّك" },
 
   // ── Manager: passcode gate ───────────────────────────────────────
   managerTitle: { en: "Manager", ar: "المدير" },

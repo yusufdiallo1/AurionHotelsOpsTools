@@ -75,6 +75,11 @@ export function IncomingForm({
   const hasMismatch = variance !== null && Math.abs(variance) > 0.005;
 
   const roomsNum = rooms.trim() === "" ? null : parseInt(rooms, 10);
+  // Room mismatch: incoming recount differs from the outgoing rooms_occupied.
+  const roomsMismatch = roomsNum !== null && roomsNum !== handover.rooms_occupied;
+
+  // A discrepancy (cash OR rooms) requires a written explanation before confirming.
+  const needsNote = hasMismatch || roomsMismatch;
 
   // Sign-off = typed name + timestamp (no drawn signature). The incoming
   // receptionist must recount cash AND verify rooms occupied.
@@ -84,7 +89,7 @@ export function IncomingForm({
     roomsNum >= 0 &&
     recountNum !== null &&
     recountNum >= 0 &&
-    (!hasMismatch || varianceNote.trim().length > 0);
+    (!needsNote || varianceNote.trim().length > 0);
 
   const shiftKey =
     SHIFT_OPTIONS.find((s) => s.value === (handover.shift_type as ShiftType))?.k ??
@@ -104,7 +109,7 @@ export function IncomingForm({
             incoming_name: incomingName.trim(),
             incoming_rooms: roomsNum!,
             cash_recount: recountNum!,
-            variance_note: hasMismatch ? varianceNote.trim() : null,
+            variance_note: needsNote ? varianceNote.trim() : null,
             incoming_signed_at: new Date().toISOString(),
             status: "completed",
           })
@@ -230,6 +235,18 @@ export function IncomingForm({
           mode="integer"
         />
 
+        {/* Room count mismatch warning */}
+        {roomsMismatch ? (
+          <div className="flex flex-col gap-2 rounded-aurion border-2 border-red-600 bg-red-50 p-4">
+            <p className="text-[15px] font-bold text-red-800">{t("roomsMismatchTitle")}</p>
+            <p className="text-[14px] text-red-700">{t("roomsMismatchBody")}</p>
+            <div className="flex justify-between text-[14px] text-red-800">
+              <span dir="ltr">{t("expectedRooms")}: {handover.rooms_occupied}</span>
+              <span dir="ltr">{t("countedRooms")}: {roomsNum}</span>
+            </div>
+          </div>
+        ) : null}
+
         <NumberField
           labelKey="fieldCashRecount"
           value={recount}
@@ -252,15 +269,11 @@ export function IncomingForm({
           </div>
         ) : null}
 
-        {/* Mismatch warning + required note */}
+        {/* Cash mismatch warning */}
         {hasMismatch ? (
-          <div className="flex flex-col gap-3 rounded-aurion border-2 border-red-600 bg-red-50 p-4">
-            <div>
-              <p className="text-[15px] font-bold text-red-800">
-                {t("cashMismatchTitle")}
-              </p>
-              <p className="mt-1 text-[14px] text-red-700">{t("cashMismatchBody")}</p>
-            </div>
+          <div className="flex flex-col gap-2 rounded-aurion border-2 border-red-600 bg-red-50 p-4">
+            <p className="text-[15px] font-bold text-red-800">{t("cashMismatchTitle")}</p>
+            <p className="text-[14px] text-red-700">{t("cashMismatchBody")}</p>
             <div className="flex justify-between text-[14px] text-red-800">
               <span>
                 {t("expectedLabel")}: {formatSAR(handover.cash_drawer, lang)}
@@ -269,14 +282,18 @@ export function IncomingForm({
                 {t("countedLabel")}: {formatSAR(recountNum, lang)}
               </span>
             </div>
-            <TextAreaField
-              labelKey="fieldVarianceNote"
-              placeholderKey="fieldVarianceNotePlaceholder"
-              value={varianceNote}
-              onChange={setVarianceNote}
-              maxLength={MAX_TEXTAREA}
-            />
           </div>
+        ) : null}
+
+        {/* Any discrepancy (cash or rooms) requires a written explanation */}
+        {needsNote ? (
+          <TextAreaField
+            labelKey="fieldVarianceNote"
+            placeholderKey="fieldVarianceNotePlaceholder"
+            value={varianceNote}
+            onChange={setVarianceNote}
+            maxLength={MAX_TEXTAREA}
+          />
         ) : null}
 
         {error ? (
