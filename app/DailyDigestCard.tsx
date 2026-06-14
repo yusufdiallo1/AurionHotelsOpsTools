@@ -242,8 +242,8 @@ export function DailyDigestCard() {
                       <span className="text-[13px] font-bold text-ink">
                         {t(f.hotelK)} · {t(f.shiftK)} · {f.outgoing_name}
                       </span>
-                      {f.fields.map((fl, i) => (
-                        <span key={i} className="mt-1 block text-[13px] text-ink-soft">
+                      {f.fields.map((fl) => (
+                        <span key={fl.labelK} className="mt-1 block text-[13px] text-ink-soft">
                           <span className="font-medium text-ink">{t(fl.labelK)}:</span>{" "}
                           {fl.text}
                         </span>
