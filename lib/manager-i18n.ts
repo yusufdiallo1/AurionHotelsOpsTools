@@ -94,6 +94,23 @@ const M = {
   earlyLeaves: { en: "Early leaves today", ar: "المغادرات المبكرة اليوم", sv: "Tidiga avgångar idag" },
   earlyLeavesNone: { en: "No early leaves today.", ar: "لا توجد مغادرات مبكرة اليوم.", sv: "Inga tidiga avgångar idag." },
   leftEarly: { en: "requested early leave", ar: "طلب مغادرة مبكرة", sv: "begärde tidig avgång" },
+
+  // Passcodes (per-hotel shared logins)
+  passcodes: { en: "Passcodes", ar: "رموز الدخول", sv: "Lösenkoder" },
+  passcodesHint: {
+    en: "Shared per-hotel login codes. Tap to view or change.",
+    ar: "رموز الدخول المشتركة لكل فندق. اضغط للعرض أو التغيير.",
+    sv: "Delade inloggningskoder per hotell. Tryck för att visa eller ändra.",
+  },
+  show: { en: "Show", ar: "عرض", sv: "Visa" },
+  hide: { en: "Hide", ar: "إخفاء", sv: "Dölj" },
+  changePasscode: { en: "Change passcode", ar: "تغيير الرمز", sv: "Ändra kod" },
+  newPasscode: { en: "New passcode", ar: "رمز جديد", sv: "Ny kod" },
+  save: { en: "Save", ar: "حفظ", sv: "Spara" },
+  saving: { en: "Saving…", ar: "جارٍ الحفظ…", sv: "Sparar…" },
+  cancel: { en: "Cancel", ar: "إلغاء", sv: "Avbryt" },
+  passcodeUpdated: { en: "Passcode updated.", ar: "تم تحديث الرمز.", sv: "Koden uppdaterad." },
+  passcodeError: { en: "Could not update passcode.", ar: "تعذّر تحديث الرمز.", sv: "Kunde inte uppdatera koden." },
 } as const satisfies Record<string, Entry>;
 
 export type ManagerKey = keyof typeof M;

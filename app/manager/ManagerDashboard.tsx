@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 import { DateField } from "@/components/ui";
 import { ActivityLog } from "./ActivityLog";
 import { EarlyLeaveFeed } from "./EarlyLeaveFeed";
+import { Passcodes, type PasscodeRow } from "./Passcodes";
+import type { Role } from "@/lib/auth";
 import { useHandoverRealtime } from "@/lib/useHandoverRealtime";
 import { PROPERTIES, type PropertySlug } from "@/lib/properties";
 import { todayIso } from "@/lib/handover";
@@ -56,8 +58,19 @@ function propName(r: ManagerRow, lang: ManagerLang): string {
   return lang === "ar" ? r.properties.name_ar : r.properties.name_en;
 }
 
-export function ManagerDashboard({ greetingName = "" }: { greetingName?: string }) {
+export function ManagerDashboard({
+  greetingName = "",
+  role = "admin",
+  passcodes = [],
+}: {
+  greetingName?: string;
+  role?: Role;
+  passcodes?: PasscodeRow[];
+}) {
   const { lang: globalLang } = useLang();
+  // Managers get a restricted view: occupancy + passcodes + basic audit only.
+  // Admins keep the full oversight dashboard.
+  const isAdmin = role === "admin";
 
   const [lang, setLang] = useState<ManagerLang>(globalLang);
   const t = (k: ManagerKey) => mt(k, lang);
@@ -205,16 +218,18 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
         </div>
       </section>
 
-      {/* Manage employees — clearly a button, below the KPIs. */}
-      <Link
-        href="/admin"
-        className="flex min-h-[52px] items-center justify-center gap-2 rounded-aurion bg-navy text-[16px] font-bold text-cream shadow-md hover:bg-navy-deep"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-5 w-5">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        {t("employees")}
-      </Link>
+      {/* Manage employees — admins only (managers can't manage staff). */}
+      {isAdmin ? (
+        <Link
+          href="/admin"
+          className="flex min-h-[52px] items-center justify-center gap-2 rounded-aurion bg-navy text-[16px] font-bold text-cream shadow-md hover:bg-navy-deep"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-5 w-5">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {t("employees")}
+        </Link>
+      ) : null}
 
       {/* By-property snapshot cards */}
       <div className="grid gap-3 sm:grid-cols-2">
@@ -257,6 +272,12 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
         ))}
       </div>
 
+      {/* Passcodes — view & reset the per-hotel shared logins (admins + managers). */}
+      <Passcodes initial={passcodes} lang={lang} />
+
+      {/* Admin-only oversight: scope/filters, stats, missing shifts, variance, early leaves. */}
+      {isAdmin ? (
+      <>
       {/* Scope + filters */}
       <section className="glass flex flex-col gap-4 rounded-aurion p-4">
         <ScopeToggle scope={scope} onChange={setScope} t={t} />
@@ -345,8 +366,10 @@ export function ManagerDashboard({ greetingName = "" }: { greetingName?: string 
 
       {/* Early-leave requests today (info only) */}
       <EarlyLeaveFeed lang={lang} />
+      </>
+      ) : null}
 
-      {/* Live activity feed (audit log) */}
+      {/* Live activity feed (audit log) — basic audit, shown to managers too. */}
       <ActivityLog lang={lang} />
 
       {/* All / recent handovers */}

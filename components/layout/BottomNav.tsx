@@ -13,6 +13,7 @@ type NavItem = {
   match: (path: string) => boolean;
   adminOnly?: boolean;
   receptionistOnly?: boolean;
+  managerVisible?: boolean; // also shown to the restricted manager role
 };
 
 const ITEMS: NavItem[] = [
@@ -42,13 +43,16 @@ const ITEMS: NavItem[] = [
     match: (p) => p.startsWith("/manager"),
     icon: <path d="M4 19V10M10 19V5M16 19v-7M22 19H2" />,
     adminOnly: true,
+    managerVisible: true,
   },
 ];
 
 function useNavItems() {
   const { role } = useAuth();
-  // Receptionists see Home + New; admins see Home + History + Manager.
+  // Receptionists see Home + New; admins see Home + History + Manager;
+  // managers see Home + Manager (restricted dashboard) only.
   return ITEMS.filter((it) => {
+    if (it.managerVisible && role === "manager") return true;
     if (it.adminOnly) return role === "admin";
     if (it.receptionistOnly) return role === "receptionist";
     return true;

@@ -7,7 +7,7 @@ import { signOut } from "@/lib/sign-out";
 
 const WARN_SECONDS = 60; // show the countdown dialog during the final minute
 
-// Global idle auto-logout. Admins: 2 min; receptionists: 3 min. In the last 60s a
+// Global idle auto-logout. Admins & managers: 2 min; receptionists: 3 min. In the last 60s a
 // countdown dialog appears with "I'm still here" / "Log out".
 export function IdleLogout() {
   const { t, dir } = useLang();
@@ -25,7 +25,8 @@ export function IdleLogout() {
 
   useEffect(() => {
     if (!userId) return;
-    const totalMs = (role === "admin" ? 2 : 3) * 60 * 1000;
+    // Privileged roles (admin, manager) idle out faster than receptionists.
+    const totalMs = (role === "admin" || role === "manager" ? 2 : 3) * 60 * 1000;
 
     const clearAll = () => {
       if (warnTimer.current) clearTimeout(warnTimer.current);

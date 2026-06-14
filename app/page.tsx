@@ -1,13 +1,17 @@
+import { redirect } from "next/navigation";
 import { getSessionProfile } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { AppHeader } from "@/components/layout";
 import { AdminHome } from "./AdminHome";
 import { ReceptionistHome, type MyHandover } from "./ReceptionistHome";
 
-// Home. Admins: search + History + Manager. Receptionists: pending incoming
-// handovers to confirm + their own handover list.
+// Home. Admins: search + History + Manager. Managers: straight to their
+// restricted dashboard. Receptionists: pending incoming handovers + their list.
 export default async function Home() {
   const session = await getSessionProfile();
+
+  // Managers have a restricted role — send them to their dashboard.
+  if (session?.role === "manager") redirect("/manager");
 
   if (!session || session.role === "admin") {
     return (

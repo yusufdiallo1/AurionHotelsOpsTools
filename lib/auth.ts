@@ -4,7 +4,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/types";
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-export type Role = "admin" | "receptionist";
+export type Role = "admin" | "receptionist" | "manager";
 
 export type SessionProfile = {
   userId: string;
@@ -59,4 +59,9 @@ export const getSessionProfile = cache(async function getSessionProfile(): Promi
 
 export async function isAdmin(): Promise<boolean> {
   return (await getSessionProfile())?.role === "admin";
+}
+
+/** Roles allowed to see the /manager dashboard (admins, plus the restricted manager role). */
+export function canSeeManager(role: Role | null | undefined): boolean {
+  return role === "admin" || role === "manager";
 }

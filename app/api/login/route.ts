@@ -2,7 +2,7 @@ import { createServerClient as createSsrClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createServiceClient } from "@/lib/supabase/server";
 
-const MAX_ATTEMPTS = 3;
+const MAX_ATTEMPTS = 5;
 
 // Username/password login with precise errors + per-account lockout.
 // Reasons: "not_found" | "wrong_password" | "locked" | "ok".

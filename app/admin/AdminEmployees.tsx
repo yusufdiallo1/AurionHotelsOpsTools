@@ -56,7 +56,7 @@ export function AdminEmployees({
   const [rows, setRows] = useState<EmployeeRow[]>(initial);
 
   // Add-employee form state
-  const [role, setRole] = useState<"receptionist" | "admin">("receptionist");
+  const [role, setRole] = useState<"receptionist" | "admin" | "manager">("receptionist");
   const [name, setName] = useState("");
   // Admins enter a USERNAME; we map it to a hidden internal email for Auth.
   const [username, setUsername] = useState("");
@@ -174,8 +174,8 @@ export function AdminEmployees({
         <h2 className="text-[15px] font-bold text-ink">{t("addEmployee")}</h2>
 
         {/* Role */}
-        <div className="grid grid-cols-2 gap-2">
-          {(["receptionist", "admin"] as const).map((r) => (
+        <div className="grid grid-cols-3 gap-2">
+          {(["receptionist", "admin", "manager"] as const).map((r) => (
             <button
               key={r}
               type="button"
@@ -187,7 +187,7 @@ export function AdminEmployees({
                   : "border border-line bg-paper text-ink-soft",
               ].join(" ")}
             >
-              {r === "receptionist" ? t("roleReceptionist") : t("roleAdmin")}
+              {r === "receptionist" ? t("roleReceptionist") : r === "admin" ? t("roleAdmin") : t("roleManager")}
             </button>
           ))}
         </div>
@@ -341,7 +341,7 @@ export function AdminEmployees({
                     @{usernameOf(emp.email)}
                   </span>
                   <span className="text-[12px] text-ink-soft">
-                    {emp.role === "admin" ? t("roleAdmin") : t("roleReceptionist")}
+                    {emp.role === "admin" ? t("roleAdmin") : emp.role === "manager" ? t("roleManager") : t("roleReceptionist")}
                     {emp.role === "receptionist" && emp.property_id
                       ? ` · ${propName(emp.property_id)}`
                       : ""}

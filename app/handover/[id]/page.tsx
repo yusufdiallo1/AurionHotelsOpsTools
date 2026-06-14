@@ -22,7 +22,8 @@ export default async function HandoverViewPage({
   if (!handover) return <PlaceholderPage titleKey="notFound" />;
 
   // Receptionists may only view handovers they were part of.
-  if (session.role !== "admin") {
+  // Admins and managers may view any handover.
+  if (session.role !== "admin" && session.role !== "manager") {
     const me = (session.profile.full_name ?? "").trim().toLowerCase();
     const isMine =
       (handover.outgoing_name ?? "").trim().toLowerCase() === me ||

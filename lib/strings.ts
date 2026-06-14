@@ -41,6 +41,7 @@ export const strings = {
   roleLabel: { en: "Role", ar: "الدور" },
   roleReceptionist: { en: "Receptionist", ar: "موظف استقبال" },
   roleAdmin: { en: "Admin", ar: "مدير" },
+  roleManager: { en: "Manager", ar: "مشرف" },
   receptionNameLabel: { en: "Reception name", ar: "اسم موظف الاستقبال" },
   shiftTimeLabel: { en: "Shift", ar: "الوردية" },
   usernameLabel: { en: "Username", ar: "اسم المستخدم" },

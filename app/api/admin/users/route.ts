@@ -6,7 +6,7 @@ type Body = {
   email?: string;
   password?: string;
   full_name?: string;
-  role?: "admin" | "receptionist";
+  role?: "admin" | "receptionist" | "manager";
   property_id?: string | null;
   shift_type?: "night" | "morning" | "afternoon" | null;
   phone?: string | null;
@@ -30,7 +30,8 @@ export async function POST(req: Request) {
 
   const email = body.email?.trim().toLowerCase();
   const password = body.password ?? "";
-  const role = body.role === "admin" ? "admin" : "receptionist";
+  const role =
+    body.role === "admin" ? "admin" : body.role === "manager" ? "manager" : "receptionist";
   if (!email || password.length < 8) {
     return Response.json(
       { ok: false, error: "email required + password ≥ 8 chars" },
