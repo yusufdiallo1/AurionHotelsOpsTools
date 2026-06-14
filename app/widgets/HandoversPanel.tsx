@@ -81,7 +81,7 @@ export function HandoversPanel({ scope }: { scope: WidgetScope }) {
               type="button"
               aria-label="previous day"
               onClick={() => setDate((dd) => addDays(dd, -1))}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-paper text-ink-soft"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-paper text-ink-soft"
             >
               ‹
             </button>
@@ -91,7 +91,7 @@ export function HandoversPanel({ scope }: { scope: WidgetScope }) {
               aria-label="next day"
               disabled={date >= today}
               onClick={() => setDate((dd) => (dd >= today ? dd : addDays(dd, 1)))}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-paper text-ink-soft disabled:opacity-40"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-paper text-ink-soft disabled:opacity-40"
             >
               ›
             </button>

@@ -44,7 +44,7 @@ export function WidgetSwitcher({ role, scope }: { role: Role; scope: WidgetScope
               aria-pressed={on}
               onClick={() => setActive(tab.key)}
               className={[
-                "min-h-[40px] shrink-0 rounded-full px-4 text-[13px] font-bold transition-colors",
+                "min-h-[44px] shrink-0 rounded-full px-4 text-[13px] font-bold transition-colors",
                 on
                   ? "border-2 border-gold bg-paper text-ink shadow-sm"
                   : "border-2 border-transparent text-ink-soft",
