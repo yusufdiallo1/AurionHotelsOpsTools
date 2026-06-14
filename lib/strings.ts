@@ -404,6 +404,28 @@ export const strings = {
     en: "Leave this handover? Your entries on this screen will be lost.",
     ar: "مغادرة هذا التسليم؟ ستفقد ما أدخلته في هذه الشاشة.",
   },
+  // Daily handover digest (admin home card)
+  digestTitleToday: { en: "Today's handovers", ar: "تسليمات اليوم" },
+  digestTitleYesterday: { en: "Yesterday's handovers", ar: "تسليمات الأمس" },
+  digestTitleOther: { en: "Handovers", ar: "التسليمات" },
+  digestCount: { en: "Handovers", ar: "التسليمات" },
+  digestOf: { en: "of", ar: "من" },
+  digestSubmittedWord: { en: "submitted", ar: "مُسلَّمة" },
+  digestAllClear: { en: "All handovers received, no mismatches ✅", ar: "تم استلام جميع التسليمات، لا فروقات ✅" },
+  digestNoneExpected: { en: "No handovers expected", ar: "لا تسليمات متوقعة" },
+  digestMissingN: { en: "missing", ar: "ناقصة" },
+  digestMismatchesN: { en: "mismatches", ar: "فروقات" },
+  digestFlagsN: { en: "flagged", ar: "ملاحظات" },
+  digestIndSubmissions: { en: "Submissions", ar: "التسليمات" },
+  digestIndMismatches: { en: "Mismatches", ar: "الفروقات" },
+  digestIndFlags: { en: "Flagged notes", ar: "ملاحظات مُعلَّمة" },
+  digestNotSubmitted: { en: "not submitted", ar: "غير مُسلَّمة" },
+  digestUnfinished: { en: "unfinished", ar: "غير مكتملة" },
+  digestNotDue: { en: "not due yet", ar: "لم يحن وقتها" },
+  digestExpected: { en: "Expected", ar: "المتوقع" },
+  digestCounted: { en: "Counted", ar: "المحسوب" },
+  digestLoading: { en: "Loading…", ar: "جارٍ التحميل…" },
+  digestError: { en: "Couldn't load handovers", ar: "تعذّر تحميل التسليمات" },
 } as const satisfies Record<string, StringEntry>;
 
 export type StringKey = keyof typeof strings;
