@@ -50,6 +50,17 @@ export default async function Home() {
     .order("created_at", { ascending: false })
     .limit(50);
 
+  // Resolve the receptionist's hotel slug (properties.code) for the widget switcher.
+  let propSlug: string | null = null;
+  if (propertyId) {
+    const { data: prop } = await db
+      .from("properties")
+      .select("code")
+      .eq("id", propertyId)
+      .maybeSingle();
+    propSlug = prop?.code ?? null;
+  }
+
   return (
     <>
       <AppHeader />
@@ -57,6 +68,8 @@ export default async function Home() {
         myName={name}
         pending={(pending ?? []) as unknown as MyHandover[]}
         mine={(mineRaw ?? []) as unknown as MyHandover[]}
+        propertyId={propertyId ?? null}
+        propSlug={propSlug}
       />
     </>
   );

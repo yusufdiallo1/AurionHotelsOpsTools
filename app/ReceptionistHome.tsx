@@ -6,6 +6,7 @@ import { useLang } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import { SHIFT_OPTIONS, formatDate } from "@/lib/handover";
 import { HandoverModal } from "@/components/HandoverModal";
+import { WidgetSwitcher } from "./widgets/WidgetSwitcher";
 import type { StringKey } from "@/lib/strings";
 
 export type MyHandover = {
@@ -23,10 +24,14 @@ export function ReceptionistHome({
   myName,
   pending,
   mine,
+  propertyId,
+  propSlug,
 }: {
   myName: string;
   pending: MyHandover[];
   mine: MyHandover[];
+  propertyId: string | null;
+  propSlug: string | null;
 }) {
   const { t, lang } = useLang();
   const [pend, setPend] = useState<MyHandover[]>(pending);
@@ -67,6 +72,13 @@ export function ReceptionistHome({
 
   return (
     <main className="mx-auto flex w-full max-w-[480px] flex-col gap-5 px-5 py-6">
+      {propertyId && propSlug ? (
+        <WidgetSwitcher
+          role="receptionist"
+          scope={{ kind: "hotel", slug: propSlug, propertyId }}
+        />
+      ) : null}
+
       {/* Pending incoming handovers — confirm now */}
       {pend.length > 0 ? (
         <section className="flex flex-col gap-3">
