@@ -114,6 +114,7 @@ export function buildDailyDigest(
   rows: ManagerRow[],
   date: string,
   now: Date,
+  slugFilter?: PropertySlug,
 ): DailyDigest {
   const riyadhNowIso = riyadhIso(now);
   const riyadhNowHour = riyadhHour(now);
@@ -132,7 +133,10 @@ export function buildDailyDigest(
     }
   }
 
-  const hotels: HotelDigest[] = PROPERTIES.map((p) => {
+  const props = slugFilter
+    ? PROPERTIES.filter((p) => p.slug === slugFilter)
+    : PROPERTIES;
+  const hotels: HotelDigest[] = props.map((p) => {
     let submitted = 0;
     let expected = 0;
     const cells: ShiftCell[] = SHIFT_OPTIONS.map((s) => {
@@ -160,7 +164,10 @@ export function buildDailyDigest(
     SHIFT_OPTIONS.find((s) => s.value === st)?.k ?? "shiftLabel";
 
   const completedRows = rows.filter(
-    (r) => r.shift_date === date && r.status === "completed",
+    (r) =>
+      r.shift_date === date &&
+      r.status === "completed" &&
+      (!slugFilter || r.properties?.code === slugFilter),
   );
 
   const mismatches: MismatchItem[] = completedRows

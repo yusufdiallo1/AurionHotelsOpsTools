@@ -2,7 +2,7 @@
 
 import { ToolCard } from "@/components/layout";
 import { HomeSearch } from "./HomeSearch";
-import { DailyDigestCard } from "./DailyDigestCard";
+import { WidgetSwitcher } from "./widgets/WidgetSwitcher";
 
 function Icon({ d }: { d: string }) {
   return (
@@ -24,7 +24,7 @@ function Icon({ d }: { d: string }) {
 export function AdminHome() {
   return (
     <main className="mx-auto flex w-full max-w-[480px] flex-col gap-3.5 px-5 py-8">
-      <DailyDigestCard />
+      <WidgetSwitcher role="admin" scope={{ kind: "portfolio" }} />
       <HomeSearch />
       <ToolCard
         href="/history"
