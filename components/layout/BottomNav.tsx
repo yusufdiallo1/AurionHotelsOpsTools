@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLang } from "@/lib/i18n";
@@ -68,7 +69,15 @@ export function NavLinks({ variant = "bar" }: { variant?: "bar" | "embedded" }) 
   const pathname = usePathname();
   const items = useNavItems();
 
-  const activeIndex = Math.max(0, items.findIndex((it) => it.match(pathname)));
+  const pathIndex = Math.max(0, items.findIndex((it) => it.match(pathname)));
+  // Optimistic highlight: move the pill the instant a link is tapped, before the
+  // route resolves. We remember which pathname was current when the click happened;
+  // once usePathname() advances past it, the click is stale and pathIndex wins.
+  // (Adjusting state during render — no effect needed; see React "you might not
+  // need an effect".)
+  const [click, setClick] = useState<{ index: number; from: string } | null>(null);
+  const activeIndex = click && click.from === pathname ? click.index : pathIndex;
+
   const count = items.length;
   const pct = activeIndex * 100;
   const sliderTransform = dir === "rtl" ? `translateX(${-pct}%)` : `translateX(${pct}%)`;
@@ -82,7 +91,7 @@ export function NavLinks({ variant = "bar" }: { variant?: "bar" | "embedded" }) 
   return (
     <div className={wrap}>
       <div
-        className="pointer-events-none absolute inset-y-1 start-1 rounded-[16px] bg-gold shadow-md transition-transform duration-300 ease-out"
+        className="pointer-events-none absolute inset-y-1 start-1 rounded-[16px] bg-gold shadow-md"
         style={{ width: `calc((100% - 0.5rem) / ${count})`, transform: sliderTransform }}
         aria-hidden
       />
@@ -93,6 +102,8 @@ export function NavLinks({ variant = "bar" }: { variant?: "bar" | "embedded" }) 
             <li key={item.href}>
               <Link
                 href={item.href}
+                prefetch
+                onClick={() => setClick({ index: i, from: pathname })}
                 aria-current={active ? "page" : undefined}
                 className={[
                   "flex min-h-[44px] flex-col items-center justify-center gap-0.5 rounded-[16px] px-3 py-1.5 transition-colors md:flex-row md:gap-2",
