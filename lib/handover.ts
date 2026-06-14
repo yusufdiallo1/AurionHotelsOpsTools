@@ -16,7 +16,7 @@ export const SHIFT_OPTIONS: { value: ShiftType; k: StringKey }[] = [
 ];
 
 // Fixed shift end times (local hours): morning 07–15, afternoon 15–23, night 23–07.
-const SHIFT_END_HOUR: Record<ShiftType, number> = {
+export const SHIFT_END_HOUR: Record<ShiftType, number> = {
   morning: 15,
   afternoon: 23,
   night: 7, // ends 07:00 the following morning
