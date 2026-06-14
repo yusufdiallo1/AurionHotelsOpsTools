@@ -426,6 +426,26 @@ export const strings = {
   digestCounted: { en: "Counted", ar: "المحسوب" },
   digestLoading: { en: "Loading…", ar: "جارٍ التحميل…" },
   digestError: { en: "Couldn't load handovers", ar: "تعذّر تحميل التسليمات" },
+  // Home widget switcher
+  widgetHandovers: { en: "Handovers", ar: "التسليمات" },
+  widgetCash: { en: "Cash", ar: "النقد" },
+  widgetOccupancy: { en: "Occupancy", ar: "الإشغال" },
+  widgetIssues: { en: "Issues", ar: "الملاحظات" },
+  widgetWeek: { en: "Week", ar: "الأسبوع" },
+  widgetCashInDrawer: { en: "Cash in drawer", ar: "النقد في الدرج" },
+  widgetPortfolioTotal: { en: "Total", ar: "الإجمالي" },
+  widgetRoomsOccupied: { en: "Rooms occupied", ar: "الغرف المشغولة" },
+  widgetOccupancyPct: { en: "Occupancy", ar: "الإشغال" },
+  widgetIssuesNone: { en: "No open issues", ar: "لا ملاحظات مفتوحة" },
+  widgetIssueMaintenance: { en: "Maintenance", ar: "الصيانة" },
+  widgetIssuePending: { en: "Pending request", ar: "طلب معلّق" },
+  widgetIssueVariance: { en: "Cash variance", ar: "فرق نقدي" },
+  widgetWeekHandovers: { en: "Handovers", ar: "التسليمات" },
+  widgetWeekVariance: { en: "Total variance", ar: "إجمالي الفروقات" },
+  widgetWeekMismatches: { en: "Mismatches", ar: "الفروقات" },
+  widgetWeekTitle: { en: "Last 7 days", ar: "آخر ٧ أيام" },
+  widgetLoading: { en: "Loading…", ar: "جارٍ التحميل…" },
+  widgetError: { en: "Couldn't load", ar: "تعذّر التحميل" },
 } as const satisfies Record<string, StringEntry>;
 
 export type StringKey = keyof typeof strings;
