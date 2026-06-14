@@ -38,6 +38,15 @@ const INK_SOFT = "#57514A";
 const LINE = "#E7DECC";
 const RED = "#B91C1C";
 
+// Strip Unicode bidi control/isolate characters (LRI/RLI/FSI/PDI/LRM/RLM/marks).
+// formatSAR/formatDate wrap values in U+2066…U+2069 so browsers keep numbers LTR
+// inside RTL text — but the embedded IBM Plex font has no glyphs for these, so
+// @react-pdf renders visible junk (e.g. "ßSAR 4,950.00i"). The PDF controls
+// direction via `direction: rtl` styling, so the isolates aren't needed here.
+function stripBidi(value: string): string {
+  return value.replace(/[‎‏‪-‮⁦-⁩]/g, "");
+}
+
 export type HandoverPdfData = Handover & {
   propertyName: string;
 };
@@ -136,8 +145,8 @@ function PdfRow({
 }) {
   return (
     <View style={styles.row}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={red ? styles.valueRed : styles.value}>{value}</Text>
+      <Text style={styles.label}>{stripBidi(label)}</Text>
+      <Text style={red ? styles.valueRed : styles.value}>{stripBidi(value)}</Text>
     </View>
   );
 }
@@ -207,7 +216,7 @@ export function HandoverPdf({
           />
           {mismatch && data.variance_note ? (
             <Text style={styles.note}>
-              {t("fieldVarianceNote")}: {data.variance_note}
+              {stripBidi(`${t("fieldVarianceNote")}: ${data.variance_note}`)}
             </Text>
           ) : null}
         </View>
