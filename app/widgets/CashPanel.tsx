@@ -13,7 +13,7 @@ function sar(value: number | null | undefined): string {
 }
 const propK = (slug: string): StringKey => (slug === "al_aqeeq" ? "propAlAqeeq" : "propAsSalaam");
 
-export function CashPanel({ scope }: { scope: WidgetScope }) {
+export function CashPanel({ scope, variant = "full" }: { scope: WidgetScope; variant?: "card" | "full" }) {
   const { lang } = useLang();
   const t = (k: StringKey) => translate(k, lang);
   // Snapshot = latest completed state; query a recent window to capture the latest.
@@ -24,11 +24,24 @@ export function CashPanel({ scope }: { scope: WidgetScope }) {
     "widget-cash",
   );
 
-  if (rows === null) return <p className="text-[14px] text-ink-soft">{t("widgetLoading")}</p>;
-  if (error) return <p className="text-[14px] text-red-700">{t("widgetError")}</p>;
-
-  const snaps = propertySnapshots(rows);
+  const loading = rows === null;
+  const snaps = rows ? propertySnapshots(rows) : [];
   const totals = dashboardTotals(snaps);
+
+  if (variant === "card") {
+    return (
+      <>
+        <h2 className="text-[14px] font-bold text-ink">{t("widgetCashInDrawer")}</h2>
+        <p className="mt-1 text-[22px] font-bold leading-tight text-ink">
+          {loading ? "…" : error ? "—" : sar(totals.cashInDrawer)}
+        </p>
+        <p className="text-[12px] text-ink-soft">{t("widgetPortfolioTotal")}</p>
+      </>
+    );
+  }
+
+  if (loading) return <p className="text-[14px] text-ink-soft">{t("widgetLoading")}</p>;
+  if (error) return <p className="text-[14px] text-red-700">{t("widgetError")}</p>;
 
   return (
     <div>

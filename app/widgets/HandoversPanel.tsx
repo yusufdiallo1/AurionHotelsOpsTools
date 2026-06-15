@@ -36,7 +36,7 @@ const MARK: Record<CellStatus, string> = {
   not_due: "·",
 };
 
-export function HandoversPanel({ scope }: { scope: WidgetScope }) {
+export function HandoversPanel({ scope, variant = "full" }: { scope: WidgetScope; variant?: "card" | "full" }) {
   const { lang } = useLang();
   const t = (k: StringKey) => translate(k, lang);
 
@@ -55,6 +55,29 @@ export function HandoversPanel({ scope }: { scope: WidgetScope }) {
       : date === addDays(today, -1)
         ? "digestTitleYesterday"
         : "digestTitleOther";
+
+  if (variant === "card") {
+    return (
+      <>
+        <h2 className="text-[14px] font-bold text-ink">{t(titleK)}</h2>
+        {digest === null ? (
+          <p className="mt-1 text-[22px] font-bold leading-tight text-ink">…</p>
+        ) : error ? (
+          <p className="mt-1 text-[22px] font-bold leading-tight text-ink">—</p>
+        ) : (
+          <>
+            <p className="mt-1 text-[22px] font-bold leading-tight text-ink">
+              {digest.submitted} {t("digestOf")} {digest.expected}
+            </p>
+            <p className="flex items-center gap-1.5 text-[12px] text-ink-soft">
+              <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_DOT[digest.status]}`} aria-hidden />
+              {t("digestSubmittedWord")}
+            </p>
+          </>
+        )}
+      </>
+    );
+  }
 
   function summaryLine(d: DailyDigest): string {
     if (d.expected === 0) return t("digestNoneExpected");

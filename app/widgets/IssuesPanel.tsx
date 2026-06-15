@@ -13,7 +13,7 @@ const KIND_K: Record<OpenIssue["kind"], StringKey> = {
   variance: "widgetIssueVariance",
 };
 
-export function IssuesPanel({ scope }: { scope: WidgetScope }) {
+export function IssuesPanel({ scope, variant = "full" }: { scope: WidgetScope; variant?: "card" | "full" }) {
   const { lang } = useLang();
   const t = (k: StringKey) => translate(k, lang);
   const today = riyadhToday();
@@ -23,10 +23,25 @@ export function IssuesPanel({ scope }: { scope: WidgetScope }) {
     "widget-issues",
   );
 
-  if (rows === null) return <p className="text-[14px] text-ink-soft">{t("widgetLoading")}</p>;
-  if (error) return <p className="text-[14px] text-red-700">{t("widgetError")}</p>;
+  const loading = rows === null;
+  const issues = rows ? openIssues(rows) : [];
 
-  const issues = openIssues(rows);
+  if (variant === "card") {
+    return (
+      <>
+        <h2 className="text-[14px] font-bold text-ink">{t("widgetIssues")}</h2>
+        <p className={`mt-1 text-[22px] font-bold leading-tight ${issues.length > 0 ? "text-red-700" : "text-ink"}`}>
+          {loading ? "…" : error ? "—" : issues.length}
+        </p>
+        <p className="text-[12px] text-ink-soft">
+          {loading || error ? "" : issues.length === 0 ? t("widgetIssuesNone") : t("widgetIssuesOpen")}
+        </p>
+      </>
+    );
+  }
+
+  if (loading) return <p className="text-[14px] text-ink-soft">{t("widgetLoading")}</p>;
+  if (error) return <p className="text-[14px] text-red-700">{t("widgetError")}</p>;
 
   return (
     <div>

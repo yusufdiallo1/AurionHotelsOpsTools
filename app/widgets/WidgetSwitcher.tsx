@@ -15,47 +15,65 @@ import { OccupancyPanel } from "./OccupancyPanel";
 import { IssuesPanel } from "./IssuesPanel";
 import { WeekPanel } from "./WeekPanel";
 
+// Each widget renders ONCE (compact when collapsed, full when expanded) so its
+// realtime channel — keyed by a fixed channelName per panel — never collides.
+function Panel({ k, scope, variant }: { k: WidgetKey; scope: WidgetScope; variant: "card" | "full" }) {
+  switch (k) {
+    case "handovers": return <HandoversPanel scope={scope} variant={variant} />;
+    case "cash": return <CashPanel scope={scope} variant={variant} />;
+    case "occupancy": return <OccupancyPanel scope={scope} variant={variant} />;
+    case "issues": return <IssuesPanel scope={scope} variant={variant} />;
+    case "week": return <WeekPanel scope={scope} variant={variant} />;
+  }
+}
+
 export function WidgetSwitcher({ role, scope }: { role: Role; scope: WidgetScope }) {
   const { lang } = useLang();
   const t = (k: StringKey) => translate(k, lang);
   const tabs = tabsForRole(role);
-  const [active, setActive] = useState<WidgetKey>(tabs[0].key);
-
-  function renderPanel() {
-    switch (active) {
-      case "handovers": return <HandoversPanel scope={scope} />;
-      case "cash": return <CashPanel scope={scope} />;
-      case "occupancy": return <OccupancyPanel scope={scope} />;
-      case "issues": return <IssuesPanel scope={scope} />;
-      case "week": return <WeekPanel scope={scope} />;
-    }
-  }
+  // Tap a card to expand it inline; tap again to collapse. Only one open at a time.
+  const [expanded, setExpanded] = useState<WidgetKey | null>(null);
 
   return (
-    <section className="glass rounded-aurion p-4">
-      {/* Glass pill tab bar */}
-      <div className="mb-4 flex gap-1 overflow-x-auto rounded-full bg-line/60 p-1">
-        {tabs.map((tab) => {
-          const on = active === tab.key;
+    <section className="grid grid-cols-2 gap-3">
+      {tabs.map((tab) => {
+        const isOpen = expanded === tab.key;
+
+        // Expanded: full-width card with a collapse header, then the full panel.
+        // (Not a <button> — the panel has its own interactive controls inside.)
+        if (isOpen) {
           return (
-            <button
-              key={tab.key}
-              type="button"
-              aria-pressed={on}
-              onClick={() => setActive(tab.key)}
-              className={[
-                "min-h-[44px] shrink-0 rounded-full px-4 text-[13px] font-bold transition-colors",
-                on
-                  ? "border-2 border-gold bg-paper text-ink shadow-sm"
-                  : "border-2 border-transparent text-ink-soft",
-              ].join(" ")}
-            >
-              {t(tab.labelK)}
-            </button>
+            <div key={tab.key} className="glass col-span-2 rounded-aurion border-2 border-gold p-4">
+              <button
+                type="button"
+                aria-expanded
+                onClick={() => setExpanded(null)}
+                className="mb-3 flex min-h-[44px] items-center gap-1.5 text-[13px] font-bold text-gold-deep"
+              >
+                ‹ {t("widgetTapToClose")}
+              </button>
+              <Panel k={tab.key} scope={scope} variant="full" />
+            </div>
           );
-        })}
-      </div>
-      {renderPanel()}
+        }
+
+        // Collapsed: a compact summary tile that opens on tap.
+        return (
+          <button
+            key={tab.key}
+            type="button"
+            aria-expanded={false}
+            aria-label={t(tab.labelK)}
+            onClick={() => setExpanded(tab.key)}
+            className="glass flex min-h-[104px] flex-col rounded-aurion border border-line/60 p-4 text-start transition-colors active:bg-paper-tint"
+          >
+            <Panel k={tab.key} scope={scope} variant="card" />
+            <span className="mt-auto pt-2 text-[12px] font-bold text-gold-deep">
+              {t("widgetTapToOpen")} ›
+            </span>
+          </button>
+        );
+      })}
     </section>
   );
 }

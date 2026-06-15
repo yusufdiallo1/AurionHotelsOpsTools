@@ -12,7 +12,7 @@ function sar(value: number | null | undefined): string {
   return `SAR ${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export function WeekPanel({ scope }: { scope: WidgetScope }) {
+export function WeekPanel({ scope, variant = "full" }: { scope: WidgetScope; variant?: "card" | "full" }) {
   const { lang } = useLang();
   const t = (k: StringKey) => translate(k, lang);
   const today = riyadhToday();
@@ -22,10 +22,25 @@ export function WeekPanel({ scope }: { scope: WidgetScope }) {
     "widget-week",
   );
 
-  if (rows === null) return <p className="text-[14px] text-ink-soft">{t("widgetLoading")}</p>;
-  if (error) return <p className="text-[14px] text-red-700">{t("widgetError")}</p>;
+  const loading = rows === null;
+  const stats = rows ? weekStats(rows) : null;
 
-  const stats = weekStats(rows);
+  if (variant === "card") {
+    return (
+      <>
+        <h2 className="text-[14px] font-bold text-ink">{t("widgetWeekTitle")}</h2>
+        <p className="mt-1 text-[22px] font-bold leading-tight text-ink">
+          {loading ? "…" : error || !stats ? "—" : stats.count}
+        </p>
+        <p className="text-[12px] text-ink-soft">
+          {loading || error || !stats ? "" : t("widgetWeekHandovers")}
+        </p>
+      </>
+    );
+  }
+
+  if (loading) return <p className="text-[14px] text-ink-soft">{t("widgetLoading")}</p>;
+  if (error || !stats) return <p className="text-[14px] text-red-700">{t("widgetError")}</p>;
 
   return (
     <div>

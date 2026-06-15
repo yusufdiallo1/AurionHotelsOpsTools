@@ -9,7 +9,7 @@ import { useScopedHandovers } from "./useScopedHandovers";
 
 const propK = (slug: string): StringKey => (slug === "al_aqeeq" ? "propAlAqeeq" : "propAsSalaam");
 
-export function OccupancyPanel({ scope }: { scope: WidgetScope }) {
+export function OccupancyPanel({ scope, variant = "full" }: { scope: WidgetScope; variant?: "card" | "full" }) {
   const { lang } = useLang();
   const t = (k: StringKey) => translate(k, lang);
   const today = riyadhToday();
@@ -19,12 +19,27 @@ export function OccupancyPanel({ scope }: { scope: WidgetScope }) {
     "widget-occupancy",
   );
 
-  if (rows === null) return <p className="text-[14px] text-ink-soft">{t("widgetLoading")}</p>;
-  if (error) return <p className="text-[14px] text-red-700">{t("widgetError")}</p>;
-
-  const allSnaps = propertySnapshots(rows);
+  const loading = rows === null;
+  const allSnaps = rows ? propertySnapshots(rows) : [];
   const snaps = scope.kind === "hotel" ? allSnaps.filter((s) => s.slug === scope.slug) : allSnaps;
   const totals = dashboardTotals(snaps);
+
+  if (variant === "card") {
+    return (
+      <>
+        <h2 className="text-[14px] font-bold text-ink">{t("widgetOccupancyPct")}</h2>
+        <p className="mt-1 text-[22px] font-bold leading-tight text-ink">
+          {loading ? "…" : error ? "—" : `${totals.occupancyPct}%`}
+        </p>
+        <p className="text-[12px] text-ink-soft">
+          {loading || error ? "" : `${totals.roomsOccupied} / ${totals.totalRooms} ${t("widgetRoomsOccupied")}`}
+        </p>
+      </>
+    );
+  }
+
+  if (loading) return <p className="text-[14px] text-ink-soft">{t("widgetLoading")}</p>;
+  if (error) return <p className="text-[14px] text-red-700">{t("widgetError")}</p>;
 
   return (
     <div>

@@ -17,7 +17,7 @@ export default async function Home() {
     return (
       <>
         <AppHeader />
-        <AdminHome />
+        <AdminHome adminName={session?.profile.full_name ?? ""} />
       </>
     );
   }

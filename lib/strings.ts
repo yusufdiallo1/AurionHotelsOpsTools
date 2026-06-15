@@ -446,6 +446,9 @@ export const strings = {
   widgetWeekTitle: { en: "Last 7 days", ar: "آخر ٧ أيام" },
   widgetLoading: { en: "Loading…", ar: "جارٍ التحميل…" },
   widgetError: { en: "Couldn't load", ar: "تعذّر التحميل" },
+  widgetIssuesOpen: { en: "Open issues", ar: "ملاحظات مفتوحة" },
+  widgetTapToOpen: { en: "Tap to open", ar: "اضغط للفتح" },
+  widgetTapToClose: { en: "Close", ar: "إغلاق" },
 } as const satisfies Record<string, StringEntry>;
 
 export type StringKey = keyof typeof strings;
