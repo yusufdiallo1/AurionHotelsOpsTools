@@ -15,6 +15,7 @@ type NavItem = {
   adminOnly?: boolean;
   receptionistOnly?: boolean;
   managerVisible?: boolean; // also shown to the restricted manager role
+  adminVisible?: boolean; // also shown to admins (in addition to its primary role)
 };
 
 const ITEMS: NavItem[] = [
@@ -30,6 +31,7 @@ const ITEMS: NavItem[] = [
     match: (p) => p.startsWith("/new"),
     icon: <path d="M12 5v14M5 12h14" />,
     receptionistOnly: true,
+    adminVisible: true,
   },
   {
     href: "/history",
@@ -50,10 +52,11 @@ const ITEMS: NavItem[] = [
 
 function useNavItems() {
   const { role } = useAuth();
-  // Receptionists see Home + New; admins see Home + History + Manager;
+  // Receptionists see Home + New; admins see Home + New + History + Manager;
   // managers see Home + Manager (restricted dashboard) only.
   return ITEMS.filter((it) => {
     if (it.managerVisible && role === "manager") return true;
+    if (it.adminVisible && role === "admin") return true;
     if (it.adminOnly) return role === "admin";
     if (it.receptionistOnly) return role === "receptionist";
     return true;

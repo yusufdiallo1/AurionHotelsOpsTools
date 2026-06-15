@@ -27,6 +27,12 @@ export function AdminHome() {
       <WidgetSwitcher role="admin" scope={{ kind: "portfolio" }} />
       <HomeSearch />
       <ToolCard
+        href="/new"
+        titleKey="navNewTitle"
+        descKey="navNewDesc"
+        icon={<Icon d="M12 5v14M5 12h14" />}
+      />
+      <ToolCard
         href="/history"
         titleKey="navHistoryTitle"
         descKey="navHistoryDesc"
