@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { publicSupabaseEnv } from "@/lib/supabase/env";
 
 // Refresh the Supabase session on every request and gate routes by auth.
 // Role-level gating (admin-only history/manager) is enforced in the pages/layouts
@@ -9,9 +10,12 @@ const PUBLIC_PATHS = ["/login", "/styleguide"];
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  // Validated env access: a missing/misnamed Supabase var fails loudly here
+  // rather than silently constructing a broken client and breaking auth.
+  const { url: supabaseUrl, anonKey: supabaseAnonKey } = publicSupabaseEnv();
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {

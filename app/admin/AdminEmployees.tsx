@@ -57,6 +57,9 @@ export function AdminEmployees({
 
   // Add-employee form state
   const [role, setRole] = useState<"receptionist" | "admin" | "manager">("receptionist");
+  // Normal = permanent active account; temporary = created locked, activated later
+  // for a hotel + shift on the Temp Accounts screen.
+  const [isTemp, setIsTemp] = useState(false);
   const [name, setName] = useState("");
   // Admins enter a USERNAME; we map it to a hidden internal email for Auth.
   const [username, setUsername] = useState("");
@@ -96,6 +99,7 @@ export function AdminEmployees({
           shift_type: role === "receptionist" ? shift : null,
           work_days: role === "receptionist" ? workDays : [],
           phone: phone.trim() || null,
+          is_temp: isTemp,
         }),
       });
       const json = await res.json();
@@ -114,14 +118,15 @@ export function AdminEmployees({
               shift_type: shift,
               work_days: workDays,
               phone: phone.trim() || null,
-              active: true,
+              // Temp accounts start locked + inactive until activated.
+              active: !isTemp,
               created_at: new Date().toISOString(),
-              locked: false,
+              locked: isTemp,
             },
             ...prev,
           ]);
         }
-        setMsg({ ok: true, text: t("employeeCreated") });
+        setMsg({ ok: true, text: isTemp ? t("employeeCreatedTemp") : t("employeeCreated") });
         // reset for next entry but keep the credentials visible to copy
         setName("");
         setUsername("");
@@ -190,6 +195,29 @@ export function AdminEmployees({
               {r === "receptionist" ? t("roleReceptionist") : r === "admin" ? t("roleAdmin") : t("roleManager")}
             </button>
           ))}
+        </div>
+
+        {/* Account type: normal (permanent) vs temporary (created locked) */}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[13px] font-bold text-ink">{t("accountTypeLabel")}</span>
+          <div className="grid grid-cols-2 gap-2">
+            {([false, true] as const).map((temp) => (
+              <button
+                key={temp ? "temp" : "normal"}
+                type="button"
+                onClick={() => setIsTemp(temp)}
+                className={[
+                  "min-h-[44px] rounded-aurion px-3 text-[14px] transition-colors",
+                  isTemp === temp
+                    ? "border-2 border-gold bg-gold-tint font-bold text-ink"
+                    : "border border-line bg-paper text-ink-soft",
+                ].join(" ")}
+              >
+                {temp ? t("accountTemp") : t("accountNormal")}
+              </button>
+            ))}
+          </div>
+          {isTemp ? <p className="text-[12px] text-ink-soft">{t("tempAccountHint")}</p> : null}
         </div>
 
         <label className="flex flex-col gap-1.5">

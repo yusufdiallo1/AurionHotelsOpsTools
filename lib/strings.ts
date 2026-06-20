@@ -56,6 +56,17 @@ export const strings = {
   dowSat: { en: "Sat", ar: "سبت" },
   phoneLabel: { en: "Phone (optional)", ar: "الهاتف (اختياري)" },
   tempPasswordLabel: { en: "Temporary password", ar: "كلمة مرور مؤقتة" },
+  accountTypeLabel: { en: "Account type", ar: "نوع الحساب" },
+  accountNormal: { en: "Normal", ar: "عادي" },
+  accountTemp: { en: "Temporary", ar: "مؤقت" },
+  tempAccountHint: {
+    en: "Created locked — activate it for a hotel + shift on the Temp Accounts screen.",
+    ar: "يُنشأ مقفلاً — فعّله لفندق ووردية من شاشة الحسابات المؤقتة.",
+  },
+  employeeCreatedTemp: {
+    en: "Temporary account created — activate it when needed.",
+    ar: "تم إنشاء حساب مؤقت — فعّله عند الحاجة.",
+  },
   generate: { en: "Generate", ar: "توليد" },
   createEmployee: { en: "Create", ar: "إنشاء" },
   creating: { en: "Creating…", ar: "جارٍ الإنشاء…" },

@@ -11,6 +11,7 @@ type Body = {
   shift_type?: "night" | "morning" | "afternoon" | null;
   phone?: string | null;
   work_days?: number[] | null;
+  is_temp?: boolean;
 };
 
 // Create an employee (admin or receptionist). Admin-only. Uses the Auth admin API
@@ -52,6 +53,10 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: msg }, { status });
   }
 
+  // Temporary accounts are created locked + inactive: they can't sign in until an
+  // admin activates them for a hotel + shift on the Temp Accounts screen.
+  const isTemp = body.is_temp === true;
+
   // Fill in the rest of the profile (trigger already created the base row).
   const { error: profErr } = await admin
     .from("profiles")
@@ -63,14 +68,16 @@ export async function POST(req: Request) {
       shift_type: role === "receptionist" ? (body.shift_type ?? null) : null,
       work_days: role === "receptionist" ? (body.work_days ?? []) : [],
       phone: body.phone ?? null,
-      active: true,
+      is_temp: isTemp,
+      active: !isTemp,
+      locked: isTemp,
     })
     .eq("id", created.user.id);
   if (profErr) {
     return Response.json({ ok: false, error: profErr.message }, { status: 400 });
   }
 
-  return Response.json({ ok: true, id: created.user.id });
+  return Response.json({ ok: true, id: created.user.id, is_temp: isTemp });
 }
 
 // Update a profile (role/active/details). Admin-only.

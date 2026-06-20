@@ -1,6 +1,7 @@
 import { createServerClient as createSsrClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createServiceClient } from "@/lib/supabase/server";
+import { publicSupabaseEnv } from "@/lib/supabase/env";
 
 const MAX_ATTEMPTS = 5;
 
@@ -50,10 +51,14 @@ export async function POST(req: Request) {
   }
 
   // 2) Attempt the sign-in via an SSR client so the session cookie is set.
+  // Pull config through the validated helper: a missing/misnamed Supabase env
+  // var throws a clear, named error instead of silently building a broken client
+  // (which would surface to users as an opaque "login failed").
   const cookieStore = await cookies();
+  const { url: supabaseUrl, anonKey: supabaseAnonKey } = publicSupabaseEnv();
   const supabase = createSsrClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
